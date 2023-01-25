@@ -3,7 +3,8 @@ using Oceananigans.Units
 using JLD2
 using FileIO
 using Printf
-using GLMakie
+# using GLMakie
+# using CairoMakie
 
 const aspect_ratio = 0.25
 
@@ -108,34 +109,37 @@ simulation.output_writers[:checkpointer] = Checkpointer(model, schedule=Iteratio
 
 run!(simulation)
 
-b_data = FieldTimeSeries("$(FILE_DIR)/instantaneous_b.jld2", "b")
+# b_data = FieldTimeSeries("$(FILE_DIR)/instantaneous_b.jld2", "b")
 
-u_data = FieldTimeSeries("$(FILE_DIR)/instantaneous_velocities.jld2", "u")
-w_data = FieldTimeSeries("$(FILE_DIR)/instantaneous_velocities.jld2", "w")
+# u_data = FieldTimeSeries("$(FILE_DIR)/instantaneous_velocities.jld2", "u")
+# w_data = FieldTimeSeries("$(FILE_DIR)/instantaneous_velocities.jld2", "w")
 
-Nt = length(b_data.times)
+# Nt = length(b_data.times)
 
-fig = Figure(resolution=(2400, 1000))
+# fig = Figure(resolution=(2400, 1000))
 
-slider = Slider(fig[2, 1:3], range=1:Nt, startvalue=1)
-n = slider.value
+# slider = Slider(fig[2, 1:3], range=1:Nt, startvalue=1)
+# n = slider.value
 
-axb = Axis(fig[1, 1], title="b")
-axu = Axis(fig[1, 2], title="u")
-axw = Axis(fig[1, 3], title="w")
+# n = Observable(1)
+# axb = Axis(fig[1, 1], title="b")
+# axu = Axis(fig[1, 2], title="u")
+# axw = Axis(fig[1, 3], title="w")
 
-bn = @lift interior(b_data[$n], :, 1, :)
-un = @lift interior(u_data[$n], :, 1, :)
-wn = @lift interior(w_data[$n], :, 1, :)
+# bn = @lift interior(b_data[$n], :, 1, :)
+# un = @lift interior(u_data[$n], :, 1, :)
+# wn = @lift interior(w_data[$n], :, 1, :)
 
-blim = maximum(abs, b_data)
-ulim = maximum(abs, u_data)
-wlim = maximum(abs, w_data)
+# blim = maximum(abs, b_data)
+# ulim = maximum(abs, u_data)
+# wlim = maximum(abs, w_data)
 
-heatmap!(axb, bn, colormap=Reverse(:RdBu_10), colorrange=(-blim, blim))
-heatmap!(axu, un, colormap=Reverse(:RdBu_10), colorrange=(-ulim, ulim))
-heatmap!(axw, wn, colormap=Reverse(:RdBu_10), colorrange=(-wlim, wlim))
+# heatmap!(axb, bn, colormap=Reverse(:RdBu_10), colorrange=(-blim, blim))
+# heatmap!(axu, un, colormap=Reverse(:RdBu_10), colorrange=(-ulim, ulim))
+# heatmap!(axw, wn, colormap=Reverse(:RdBu_10), colorrange=(-wlim, wlim))
 
-record(fig, "$(FILE_DIR)/rayleighbenard_convection.mp4", 1:Nt, framerate=20) do nn
-    n[] = nn
-end
+# display(fig)
+
+# record(fig, "$(FILE_DIR)/rayleighbenard_convection.mp4", 1:Nt, framerate=1) do nn
+#     n[] = nn
+# end
