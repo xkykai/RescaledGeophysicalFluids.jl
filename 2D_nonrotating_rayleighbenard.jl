@@ -24,7 +24,7 @@ const S = Ra * ν * κ / Lz ^ 4
 const Ta = 0
 const f = √(Ta * ν ^ 2 / Lz ^ 4)
 
-FILE_DIR = "2D_no_wind_Ra_$(Ra)_Ta_$(Ta)_alpha_$(aspect_ratio)"
+FILE_DIR = "Data/2D_no_wind_Ra_$(Ra)_Ta_$(Ta)_alpha_$(aspect_ratio)"
 mkpath(FILE_DIR)
 
 grid = RectilinearGrid(CPU(), Float64,
