@@ -13,6 +13,7 @@ w_data = FieldTimeSeries("$(FILE_DIR)/instantaneous_velocities.jld2", "w")
 
 Nt = length(b_data.times)
 
+##
 fig = Figure(resolution=(2400, 1000))
 
 slider = Slider(fig[2, 1:3], range=1:Nt, startvalue=1)
@@ -36,7 +37,8 @@ heatmap!(axu, un, colormap=Reverse(:RdBu_10), colorrange=(-ulim, ulim))
 heatmap!(axw, wn, colormap=Reverse(:RdBu_10), colorrange=(-wlim, wlim))
 
 display(fig)
+##
 
-record(fig, "$(FILE_DIR)/rayleighbenard_convection.mp4", 1:Nt, framerate=1) do nn
+record(fig, "$(FILE_DIR)/rayleighbenard_convection.mp4", 1:Nt, framerate=30) do nn
     n[] = nn
 end
