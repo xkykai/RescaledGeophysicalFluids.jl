@@ -54,6 +54,8 @@ set!(model, b=b_initial)
 
 simulation = Simulation(model, Δt=1e-6second, stop_iteration=10000)
 
+simulation.stop_iteration = 30000
+
 wizard = TimeStepWizard(max_change=1.1, max_Δt=5e-6)
 simulation.callbacks[:wizard] = Callback(wizard, IterationInterval(1))
 
@@ -107,39 +109,4 @@ simulation.output_writers[:velocities] = JLD2OutputWriter(model, model.velocitie
 
 simulation.output_writers[:checkpointer] = Checkpointer(model, schedule=IterationInterval(1000), prefix="$(FILE_DIR)/model_checkpoint")
 
-run!(simulation)
-
-# b_data = FieldTimeSeries("$(FILE_DIR)/instantaneous_b.jld2", "b")
-
-# u_data = FieldTimeSeries("$(FILE_DIR)/instantaneous_velocities.jld2", "u")
-# w_data = FieldTimeSeries("$(FILE_DIR)/instantaneous_velocities.jld2", "w")
-
-# Nt = length(b_data.times)
-
-# fig = Figure(resolution=(2400, 1000))
-
-# slider = Slider(fig[2, 1:3], range=1:Nt, startvalue=1)
-# n = slider.value
-
-# n = Observable(1)
-# axb = Axis(fig[1, 1], title="b")
-# axu = Axis(fig[1, 2], title="u")
-# axw = Axis(fig[1, 3], title="w")
-
-# bn = @lift interior(b_data[$n], :, 1, :)
-# un = @lift interior(u_data[$n], :, 1, :)
-# wn = @lift interior(w_data[$n], :, 1, :)
-
-# blim = maximum(abs, b_data)
-# ulim = maximum(abs, u_data)
-# wlim = maximum(abs, w_data)
-
-# heatmap!(axb, bn, colormap=Reverse(:RdBu_10), colorrange=(-blim, blim))
-# heatmap!(axu, un, colormap=Reverse(:RdBu_10), colorrange=(-ulim, ulim))
-# heatmap!(axw, wn, colormap=Reverse(:RdBu_10), colorrange=(-wlim, wlim))
-
-# display(fig)
-
-# record(fig, "$(FILE_DIR)/rayleighbenard_convection.mp4", 1:Nt, framerate=1) do nn
-#     n[] = nn
-# end
+run!(simulation, pickup="$(FILE_DIR)/model_checkpoint_iteration10000.jld2")
