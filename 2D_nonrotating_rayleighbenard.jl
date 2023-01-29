@@ -96,7 +96,7 @@ simulation.output_writers[:b] = JLD2OutputWriter(model, (; b),
                                                           filename = "$(FILE_DIR)/instantaneous_b.jld2",
                                                           schedule = IterationInterval(10),
                                                           with_halos = true,
-                                                          overwrite_existing = true,
+                                                        #   overwrite_existing = true,
                                                           init = init_save_some_metadata!)
                                                                               
 
@@ -104,7 +104,7 @@ simulation.output_writers[:velocities] = JLD2OutputWriter(model, model.velocitie
                                                           filename = "$(FILE_DIR)/instantaneous_velocities.jld2",
                                                           schedule = IterationInterval(10),
                                                           with_halos = true,
-                                                          overwrite_existing = true,
+                                                        #   overwrite_existing = true,
                                                           init = init_save_some_metadata!)
 
 simulation.output_writers[:checkpointer] = Checkpointer(model, schedule=IterationInterval(1000), prefix="$(FILE_DIR)/model_checkpoint")
