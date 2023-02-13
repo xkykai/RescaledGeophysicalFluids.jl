@@ -27,11 +27,11 @@ const f = √(Ta * ν ^ 2 / Lz ^ 4)
 FILE_DIR = "Data/2D_no_wind_Ra_$(Ra)_Ta_$(Ta)_alpha_$(aspect_ratio)"
 mkpath(FILE_DIR)
 
-grid = RectilinearGrid(CPU(), Float64,
+grid = RectilinearGrid(GPU(), Float64,
                        size = (Nx, Nz),
                        halo = (4, 4),
                        x = (0, Lx),
-                       z = (-Lz, 0),
+                       z = (0, Lz),
                        topology = (Periodic, Flat, Bounded))
 
 b_bcs = FieldBoundaryConditions(top = ValueBoundaryCondition(-S * Lz),
@@ -52,9 +52,9 @@ model = NonhydrostaticModel(;
 
 set!(model, b=b_initial)
 
-simulation = Simulation(model, Δt=1e-6second, stop_iteration=10000)
+simulation = Simulation(model, Δt=1e-6second, stop_iteration=1000)
 
-simulation.stop_iteration = 30000
+# simulation.stop_iteration = 30000
 
 wizard = TimeStepWizard(max_change=1.1, max_Δt=5e-6)
 simulation.callbacks[:wizard] = Callback(wizard, IterationInterval(1))
@@ -109,4 +109,5 @@ simulation.output_writers[:velocities] = JLD2OutputWriter(model, model.velocitie
 
 simulation.output_writers[:checkpointer] = Checkpointer(model, schedule=IterationInterval(1000), prefix="$(FILE_DIR)/model_checkpoint")
 
-run!(simulation, pickup="$(FILE_DIR)/model_checkpoint_iteration10000.jld2")
+# run!(simulation, pickup="$(FILE_DIR)/model_checkpoint_iteration10000.jld2")
+run!(simulation)
