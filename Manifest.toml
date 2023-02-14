@@ -2,7 +2,7 @@
 
 julia_version = "1.8.5"
 manifest_format = "2.0"
-project_hash = "0cf5df5468a4469984fdf6dd7daa2ff025c08cec"
+project_hash = "26b969856c0fed90f3c1574f29db228568c6c165"
 
 [[deps.AMGX]]
 deps = ["AMGX_jll", "CEnum", "CUDA", "JSON", "Libdl", "SparseArrays"]
@@ -969,12 +969,6 @@ deps = ["AMGX", "Adapt", "AlgebraicMultigrid", "CUDA", "CUDAKernels", "Crayons",
 git-tree-sha1 = "e56badaf380845fee66e09aac0015d141117767d"
 uuid = "9e8cae18-63c1-5223-a75c-80ca9d6e9a09"
 version = "0.79.3"
-
-[[deps.Oceanostics]]
-deps = ["DocStringExtensions", "Oceananigans", "Printf"]
-git-tree-sha1 = "9bea3b4026e1cb9af98f404baabc57face59684c"
-uuid = "d0ccf422-c8fb-49b5-a76d-74acdde946ac"
-version = "0.10.1"
 
 [[deps.OffsetArrays]]
 deps = ["Adapt"]
