@@ -11,8 +11,8 @@ const aspect_ratio = 0.25
 const Lz = 1meter    # depth [m]
 const Lx = Lz / aspect_ratio # north-south extent [m]
 
-const Nx = 200
-const Nz = 200
+const Nx = 256
+const Nz = 256
 
 const Pr = 1
 const ν = 1
@@ -52,12 +52,13 @@ model = NonhydrostaticModel(;
 
 set!(model, b=b_initial)
 
-simulation = Simulation(model, Δt=1e-6second, stop_iteration=1000)
+# simulation = Simulation(model, Δt=1e-6second, stop_iteration=20)
+simulation = Simulation(model, Δt=1e-6second, stop_time=20seconds)
 
 # simulation.stop_iteration = 30000
 
-wizard = TimeStepWizard(max_change=1.1, max_Δt=5e-6)
-simulation.callbacks[:wizard] = Callback(wizard, IterationInterval(1))
+wizard = TimeStepWizard(max_change=1.05, max_Δt=1e-5)
+simulation.callbacks[:wizard] = Callback(wizard, IterationInterval(50))
 
 wall_clock = [time_ns()]
 
@@ -78,7 +79,8 @@ function print_progress(sim)
     return nothing
 end
 
-simulation.callbacks[:print_progress] = Callback(print_progress, IterationInterval(1))
+simulation.callbacks[:print_progress] = Callback(print_progress, IterationInterval(1000))
+# simulation.callbacks[:print_progress] = Callback(print_progress, IterationInterval(1))
 
 function init_save_some_metadata!(file, model)
     file["author"] = "Xin Kai Lee"
@@ -87,27 +89,55 @@ function init_save_some_metadata!(file, model)
     file["parameters/rayleigh_number"] = Ra
     file["parameters/prandtl_number"] = Pr
     file["parameters/taylor_number"] = Ta
+    file["parameters/aspect_ratio"] = aspect_ratio
     return nothing
 end
 
 b = model.tracers.b
+u, v, w = model.velocities
 
-simulation.output_writers[:b] = JLD2OutputWriter(model, (; b),
-                                                          filename = "$(FILE_DIR)/instantaneous_b.jld2",
-                                                          schedule = IterationInterval(10),
+B = Average(b, dims=(1, 2))
+U = Average(u, dims=(1, 2))
+V = Average(v, dims=(1, 2))
+W = Average(w, dims=(1, 2))
+
+UW = Average(w * u, dims=(1, 2))
+VW = Average(w * v, dims=(1, 2))
+WW = Average(w * w, dims=(1, 2))
+WB = Average(w * b, dims=(1, 2))
+
+UV = Average(v * u, dims=(1, 2))
+VV = Average(v * v, dims=(1, 2))
+VB = Average(v * b, dims=(1, 2))
+
+UU = Average(u * u, dims=(1, 2))
+UB = Average(u * b, dims=(1, 2))
+
+field_outputs = merge(model.velocities, model.tracers)
+
+simulation.output_writers[:jld2] = JLD2OutputWriter(model, field_outputs,
+                                                          filename = "$(FILE_DIR)/instantaneous_fields.jld2",
+                                                          schedule = TimeInterval(2e-3),
+                                                          # schedule = IterationInterval(10),
                                                           with_halos = true,
                                                         #   overwrite_existing = true,
                                                           init = init_save_some_metadata!)
-                                                                              
 
-simulation.output_writers[:velocities] = JLD2OutputWriter(model, model.velocities,
-                                                          filename = "$(FILE_DIR)/instantaneous_velocities.jld2",
-                                                          schedule = IterationInterval(10),
+simulation.output_writers[:timeseries] = JLD2OutputWriter(model, (; B, U, V, W, UW, VW, WW, WB, UV, VV, VB, UU, UB),
+                                                          filename = "$(FILE_DIR)/instantaneous_timeseries.jld2",
+                                                          # schedule = IterationInterval(10),
+                                                          schedule = TimeInterval(2e-3),
                                                           with_halos = true,
                                                         #   overwrite_existing = true,
                                                           init = init_save_some_metadata!)
 
-simulation.output_writers[:checkpointer] = Checkpointer(model, schedule=IterationInterval(1000), prefix="$(FILE_DIR)/model_checkpoint")
+simulation.output_writers[:averages] = JLD2OutputWriter(model, (; B, U, V, W, UW, VW, WW, WB, UV, VV, VB, UU, UB),
+                                                        filename = "$(FILE_DIR)/averaged_timeseries.jld2",
+                                                        schedule = AveragedTimeInterval(1seconds, window=1second),
+                                                        with_halos = true,
+                                                        init = init_save_some_metadata!)
+
+simulation.output_writers[:checkpointer] = Checkpointer(model, schedule=TimeInterval(10seconds), prefix="$(FILE_DIR)/model_checkpoint")
 
 # run!(simulation, pickup="$(FILE_DIR)/model_checkpoint_iteration10000.jld2")
 run!(simulation)
