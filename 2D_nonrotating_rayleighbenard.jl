@@ -57,8 +57,8 @@ simulation = Simulation(model, Δt=1e-6second, stop_time=20seconds)
 
 # simulation.stop_iteration = 30000
 
-wizard = TimeStepWizard(max_change=1.05, max_Δt=1e-5)
-simulation.callbacks[:wizard] = Callback(wizard, IterationInterval(50))
+wizard = TimeStepWizard(max_change=1.05, max_Δt=5e-6)
+simulation.callbacks[:wizard] = Callback(wizard, IterationInterval(20))
 
 wall_clock = [time_ns()]
 
