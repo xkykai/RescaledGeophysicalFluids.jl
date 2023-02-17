@@ -53,7 +53,7 @@ model = NonhydrostaticModel(;
 set!(model, b=b_initial)
 
 # simulation = Simulation(model, Δt=1e-6second, stop_iteration=20)
-simulation = Simulation(model, Δt=1e-6second, stop_time=20seconds)
+simulation = Simulation(model, Δt=1e-6second, stop_time=10seconds)
 
 # simulation.stop_iteration = 30000
 
@@ -137,7 +137,7 @@ simulation.output_writers[:averages] = JLD2OutputWriter(model, (; B, U, V, W, UW
                                                         with_halos = true,
                                                         init = init_save_some_metadata!)
 
-simulation.output_writers[:checkpointer] = Checkpointer(model, schedule=TimeInterval(10seconds), prefix="$(FILE_DIR)/model_checkpoint")
+simulation.output_writers[:checkpointer] = Checkpointer(model, schedule=TimeInterval(2.5seconds), prefix="$(FILE_DIR)/model_checkpoint")
 
 # run!(simulation, pickup="$(FILE_DIR)/model_checkpoint_iteration10000.jld2")
 run!(simulation)
