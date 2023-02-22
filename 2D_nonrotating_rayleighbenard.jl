@@ -4,7 +4,8 @@ using JLD2
 using FileIO
 using Printf
 # using GLMakie
-# using CairoMakie
+using CairoMakie
+using Oceananigans.Grids: halo_size
 
 const aspect_ratio = 0.25
 
@@ -53,7 +54,7 @@ model = NonhydrostaticModel(;
 set!(model, b=b_initial)
 
 # simulation = Simulation(model, Δt=1e-6second, stop_iteration=20)
-simulation = Simulation(model, Δt=1e-6second, stop_time=10seconds)
+simulation = Simulation(model, Δt=1e-6second, stop_time=1second)
 
 # simulation.stop_iteration = 30000
 
@@ -137,7 +138,50 @@ simulation.output_writers[:averages] = JLD2OutputWriter(model, (; B, U, V, W, UW
                                                         with_halos = true,
                                                         init = init_save_some_metadata!)
 
-simulation.output_writers[:checkpointer] = Checkpointer(model, schedule=TimeInterval(2.5seconds), prefix="$(FILE_DIR)/model_checkpoint")
+simulation.output_writers[:checkpointer] = Checkpointer(model, schedule=TimeInterval(1seconds), prefix="$(FILE_DIR)/model_checkpoint")
 
 # run!(simulation, pickup="$(FILE_DIR)/model_checkpoint_iteration10000.jld2")
 run!(simulation)
+
+b_data = FieldTimeSeries("$(FILE_DIR)/instantaneous_fields.jld2", "b")
+B_data = FieldTimeSeries("$(FILE_DIR)/instantaneous_timeseries.jld2", "B")
+WB_data = FieldTimeSeries("$(FILE_DIR)/instantaneous_timeseries.jld2", "WB")
+
+Nu_data = WB_data ./ (κ * S)
+
+Nt = length(b_data.times)
+
+xC = B_data.grid.xᶜᵃᵃ[1:Nx]
+zC = B_data.grid.zᵃᵃᶜ[1:Nz]
+zF = WB_data.grid.zᵃᵃᶠ[1:Nz+1]
+
+fig = Figure(resolution=(1500, 1500))
+
+slider = Slider(fig[0, 1:2], range=1:Nt, startvalue=1)
+n = slider.value
+
+axb = Axis(fig[1, 1:2], title="b", xlabel="x", ylabel="z")
+axB = Axis(fig[2, 1], title="<b>", xlabel="<b>", ylabel="z")
+axNu = Axis(fig[2, 2], title="Nu", xlabel="Nu", ylabel="z")
+
+bn = @lift interior(b_data[$n], :, 1, :)
+Bn = @lift interior(B_data[$n], 1, 1, :)
+Nun = @lift Nu_data[1, 1, :, $n]
+time_str = @lift "Time = $(round(b_data.times[$n], digits=2))"
+
+title = Label(fig[-1, 1:2], time_str, font=:bold)
+
+blim = (-1*maximum(abs, b_data), maximum(abs, b_data))
+Blim = (minimum(B_data), maximum(B_data))
+Nulim = (minimum(Nu_data), maximum(Nu_data))
+
+heatmap!(axb, xC, zC, bn, colormap=Reverse(:RdBu_10), colorrange=blim)
+lines!(axB, Bn, zC)
+lines!(axNu, Nun, zF)
+
+xlims!(axB, Blim)
+xlims!(axNu, Nulim)
+
+record(fig, "$(FILE_DIR)/rayleighbenard_convection.mp4", 1:Nt, framerate=10) do nn
+    n[] = nn
+end
