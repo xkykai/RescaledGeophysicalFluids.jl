@@ -19,7 +19,7 @@ const Pr = 1
 const ν = 1
 const κ = ν / Pr
 
-const Ra = 1e6
+const Ra = 1e7
 const S = Ra * ν * κ / Lz ^ 4
 
 const Ta = 0
@@ -53,13 +53,13 @@ model = NonhydrostaticModel(;
 
 set!(model, b=b_initial)
 
-# simulation = Simulation(model, Δt=1e-6second, stop_iteration=20)
-simulation = Simulation(model, Δt=1e-6second, stop_time=1second)
+# simulation = Simulation(model, Δt=1e-6second, stop_iteration=200)
+simulation = Simulation(model, Δt=1e-6second, stop_time=2seconds)
 
 # simulation.stop_iteration = 30000
 
 wizard = TimeStepWizard(max_change=1.05, max_Δt=5e-6)
-simulation.callbacks[:wizard] = Callback(wizard, IterationInterval(1))
+simulation.callbacks[:wizard] = Callback(wizard, IterationInterval(10))
 # simulation.callbacks[:wizard] = Callback(wizard, IterationInterval(1))
 
 wall_clock = [time_ns()]
