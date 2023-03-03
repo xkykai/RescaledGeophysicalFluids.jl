@@ -81,8 +81,8 @@ function print_progress(sim)
     return nothing
 end
 
-# simulation.callbacks[:print_progress] = Callback(print_progress, IterationInterval(1000))
-simulation.callbacks[:print_progress] = Callback(print_progress, IterationInterval(1))
+simulation.callbacks[:print_progress] = Callback(print_progress, IterationInterval(1000))
+# simulation.callbacks[:print_progress] = Callback(print_progress, IterationInterval(1))
 
 function init_save_some_metadata!(file, model)
     file["author"] = "Xin Kai Lee"
