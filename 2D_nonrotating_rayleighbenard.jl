@@ -19,7 +19,7 @@ const Pr = 1
 const ν = 1
 const κ = ν / Pr
 
-const Ra = 1e9
+const Ra = 1e10
 const S = Ra * ν * κ / Lz ^ 4
 
 const Ta = 0
@@ -54,7 +54,7 @@ model = NonhydrostaticModel(;
 set!(model, b=b_initial)
 
 # simulation = Simulation(model, Δt=1e-6second, stop_iteration=200)
-simulation = Simulation(model, Δt=1e-6second, stop_time=1second)
+simulation = Simulation(model, Δt=0.5e-6second, stop_time=1second)
 
 # simulation.stop_iteration = 30000
 
