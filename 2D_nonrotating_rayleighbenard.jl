@@ -12,14 +12,14 @@ const aspect_ratio = 0.25
 const Lz = 1meter    # depth [m]
 const Lx = Lz / aspect_ratio # north-south extent [m]
 
-const Nz = 256
+const Nz = 512
 const Nx = Int(Nz / aspect_ratio)
 
 const Pr = 1
 const ν = 1
 const κ = ν / Pr
 
-const Ra = 1e7
+const Ra = 1e8
 const S = Ra * ν * κ / Lz ^ 4
 
 const Ta = 0
@@ -59,8 +59,8 @@ simulation = Simulation(model, Δt=1e-6second, stop_time=2seconds)
 # simulation.stop_iteration = 30000
 
 wizard = TimeStepWizard(max_change=1.05, max_Δt=5e-6)
-simulation.callbacks[:wizard] = Callback(wizard, IterationInterval(10))
-# simulation.callbacks[:wizard] = Callback(wizard, IterationInterval(1))
+# simulation.callbacks[:wizard] = Callback(wizard, IterationInterval(10))
+simulation.callbacks[:wizard] = Callback(wizard, IterationInterval(1))
 
 wall_clock = [time_ns()]
 
@@ -81,8 +81,8 @@ function print_progress(sim)
     return nothing
 end
 
-simulation.callbacks[:print_progress] = Callback(print_progress, IterationInterval(1000))
-# simulation.callbacks[:print_progress] = Callback(print_progress, IterationInterval(1))
+# simulation.callbacks[:print_progress] = Callback(print_progress, IterationInterval(1000))
+simulation.callbacks[:print_progress] = Callback(print_progress, IterationInterval(1))
 
 function init_save_some_metadata!(file, model)
     file["author"] = "Xin Kai Lee"
