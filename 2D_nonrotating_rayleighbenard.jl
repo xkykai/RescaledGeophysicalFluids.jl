@@ -12,8 +12,8 @@ const aspect_ratio = 0.25
 const Lz = 1meter    # depth [m]
 const Lx = Lz / aspect_ratio # north-south extent [m]
 
-const Nx = 256
 const Nz = 256
+const Nx = Int(Nz / aspect_ratio)
 
 const Pr = 1
 const ν = 1
@@ -60,6 +60,7 @@ simulation = Simulation(model, Δt=1e-6second, stop_time=1second)
 
 wizard = TimeStepWizard(max_change=1.05, max_Δt=5e-6)
 simulation.callbacks[:wizard] = Callback(wizard, IterationInterval(20))
+# simulation.callbacks[:wizard] = Callback(wizard, IterationInterval(1))
 
 wall_clock = [time_ns()]
 
