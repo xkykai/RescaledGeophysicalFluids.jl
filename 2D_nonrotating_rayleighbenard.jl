@@ -12,20 +12,20 @@ const aspect_ratio = 0.25
 const Lz = 1meter    # depth [m]
 const Lx = Lz / aspect_ratio # north-south extent [m]
 
-const Nz = 512
+const Nz = 256
 const Nx = Int(Nz / aspect_ratio)
 
 const Pr = 1
 const ν = 1
 const κ = ν / Pr
 
-const Ra = 1e10
+const Ra = 1e8
 const S = Ra * ν * κ / Lz ^ 4
 
 const Ta = 0
 const f = √(Ta * ν ^ 2 / Lz ^ 4)
 
-FILE_DIR = "Data/2D_no_wind_Ra_$(Ra)_Ta_$(Ta)_alpha_$(aspect_ratio)"
+FILE_DIR = "Data/2D_no_wind_Ra_$(Ra)_Ta_$(Ta)_alpha_$(aspect_ratio)_Nz_$(Nz)"
 mkpath(FILE_DIR)
 
 grid = RectilinearGrid(GPU(), Float64,
@@ -168,7 +168,7 @@ axNu = Axis(fig[2, 2], title="Nu", xlabel="Nu", ylabel="z")
 bn = @lift interior(b_data[$n], :, 1, :)
 Bn = @lift interior(B_data[$n], 1, 1, :)
 Nun = @lift Nu_data[1, 1, :, $n]
-time_str = @lift "Time = $(round(b_data.times[$n], digits=2))"
+time_str = @lift "Ra = $(Ra), Ta = $(Ta), Pr = $(Pr), Time = $(round(b_data.times[$n], digits=2))"
 
 title = Label(fig[-1, 1:2], time_str, font=:bold)
 
