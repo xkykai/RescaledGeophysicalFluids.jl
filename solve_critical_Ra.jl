@@ -262,6 +262,15 @@ function find_plot_critical_Ra_k_A(bcs_type, ks, Ta, Pr; Ra_min, Ra_max, ν=1, H
 
     return res_Ra_k, fig, A, A_eigen, k′, m′s
 end
+
+function find_zero_eigenvalue(A_eigen::Eigen, ms)
+    ϵ = √(eps(typeof(real(A_eigen.values[1]))))
+    zero_eigval_ind = isapprox.(A_eigen.values, 0, atol=ϵ)
+    zero_eigvec = A_eigen.vectors[:, zero_eigval_ind]
+    nonzero_eigvec_ind = .!isapprox.(zero_eigvec, 0, atol=ϵ)[:]
+    nonzero_ms = ms[nonzero_eigvec_ind]
+    return nonzero_ms, nonzero_eigvec_ind
+end
 ##
 # uv: top flux, bottom flux, b: top value, bottom value
 bcs_type_uv_tfbf_b_tvbv = (; uv = (; top=FluxBoundaryCondition, bot=FluxBoundaryCondition), 
@@ -272,7 +281,9 @@ ks_uv_tfbf_b_tvbv = 1.5:0.01:5
 res_Ra_k_uv_tfbf_b_tvbv, fig_uv_tfbf_b_tvbv, A_uv_tfbf_b_tvbv, A_eigen_uv_tfbf_b_tvbv, k′_uv_tfbf_b_tvbv, m′s_uv_tfbf_b_tvbv = find_plot_critical_Ra_k_A(
     bcs_type_uv_tfbf_b_tvbv, ks_uv_tfbf_b_tvbv, Ta, Pr; Ra_min=Ta*1.5, Ra_max=1e4)
 
-save("Output/Rac_k_uv_tfbf_b_tvbv.png", fig_uv_tfbf_b_tvbv, px_per_unit=4)
+# save("Output/Rac_k_uv_tfbf_b_tvbv.png", fig_uv_tfbf_b_tvbv, px_per_unit=4)
+
+nonzero_m′s_uv_tfbf_b_tvbv, nonzero_eigvec_ind_uv_tfbf_b_tvbv = find_zero_eigenvalue(A_eigen_uv_tfbf_b_tvbv, m′s_uv_tfbf_b_tvbv)
 
 ##
 # uv: top value, bottom value, b: top value, bottom value
@@ -282,9 +293,12 @@ bcs_type_uv_tvbv_b_tvbv = (; uv = (; top=ValueBoundaryCondition, bot=ValueBounda
 
 ks_uv_tvbv_b_tvbv = 1.5:0.01:5
 res_Ra_k_uv_tvbv_b_tvbv, fig_uv_tvbv_b_tvbv, A_uv_tvbv_b_tvbv, A_eigen_uv_tvbv_b_tvbv, k′_uv_tvbv_b_tvbv, m′s_uv_tvbv_b_tvbv = find_plot_critical_Ra_k_A(
-    bcs_type_uv_tvbv_b_tvbv, ks_uv_tvbv_b_tvbv, Ta, Pr; Ra_min=Ta*1.5, Ra_max=1e4)
+    bcs_type_uv_tvbv_b_tvbv, ks_uv_tvbv_b_tvbv, Ta, Pr; Ra_min=Ta*1.5, Ra_max=10000)
                               
-save("Output/Rac_k_uv_tvbv_b_tvbv.png", fig_uv_tvbv_b_tvbv, px_per_unit=4)
+# save("Output/Rac_k_uv_tvbv_b_tvbv.png", fig_uv_tvbv_b_tvbv, px_per_unit=4)
+
+nonzero_m′s_uv_tvbv_b_tvbv, nonzero_eigvec_ind_uv_tvbv_b_tvbv = find_zero_eigenvalue(A_eigen_uv_tvbv_b_tvbv, m′s_uv_tvbv_b_tvbv)
+
 ##
 # uv: top flux, bottom value, b: top value, bottom value
 bcs_type_uv_tfbv_b_tvbv = (; uv = (; top=FluxBoundaryCondition, bot=ValueBoundaryCondition), 
@@ -295,7 +309,10 @@ ks_uv_tfbv_b_tvbv = 1.5:0.01:4.5
 res_Ra_k_uv_tfbv_b_tvbv, fig_uv_tfbv_b_tvbv, A_uv_tfbv_b_tvbv, A_eigen_uv_tfbv_b_tvbv, k′_uv_tfbv_b_tvbv, m′s_uv_tfbv_b_tvbv = find_plot_critical_Ra_k_A(
     bcs_type_uv_tfbv_b_tvbv, ks_uv_tfbv_b_tvbv, Ta, Pr; Ra_min=Ta*1.5, Ra_max=1e4)
                               
-save("Output/Rac_k_uv_tfbv_b_tvbv.png", fig_uv_tfbv_b_tvbv, px_per_unit=4)
+# save("Output/Rac_k_uv_tfbv_b_tvbv.png", fig_uv_tfbv_b_tvbv, px_per_unit=4)
+
+nonzero_m′s_uv_tfbv_b_tvbv, nonzero_eigvec_ind_uv_tfbv_b_tvbv = find_zero_eigenvalue(A_eigen_uv_tfbv_b_tvbv, m′s_uv_tfbv_b_tvbv)
+
 ##
 # uv: top flux, bottom flux, b: top flux, bottom flux
 bcs_type_uv_tfbf_b_tfbf = (; uv = (; top=FluxBoundaryCondition, bot=FluxBoundaryCondition), 
@@ -306,7 +323,10 @@ ks_uv_tfbf_b_tfbf = 3:0.01:5
 res_Ra_k_uv_tfbf_b_tfbf, fig_uv_tfbf_b_tfbf, A_uv_tfbf_b_tfbf, A_eigen_uv_tfbf_b_tfbf, k′_uv_tfbf_b_tfbf, m′s_uv_tfbf_b_tfbf = find_plot_critical_Ra_k_A(
     bcs_type_uv_tfbf_b_tfbf, ks_uv_tfbf_b_tfbf, Ta, Pr; Ra_min=Ta*1.5, Ra_max=1e4)
 
-save("Output/Rac_k_uv_tfbf_b_tfbf.png", fig_uv_tfbf_b_tfbf, px_per_unit=4)
+# save("Output/Rac_k_uv_tfbf_b_tfbf.png", fig_uv_tfbf_b_tfbf, px_per_unit=4)
+
+nonzero_m′s_uv_tfbf_b_tfbf, nonzero_eigvec_ind_uv_tfbf_b_tfbf = find_zero_eigenvalue(A_eigen_uv_tfbf_b_tfbf, m′s_uv_tfbf_b_tfbf)
+
 ##
 # uv: top value, bottom value, b: top flux, bottom flux
 bcs_type_uv_tvbv_b_tfbf = (; uv = (; top=ValueBoundaryCondition, bot=ValueBoundaryCondition), 
@@ -317,7 +337,10 @@ ks_uv_tvbv_b_tfbf = 3:0.01:4.5
 res_Ra_k_uv_tvbv_b_tfbf, fig_uv_tvbv_b_tfbf, A_uv_tvbv_b_tfbf, A_eigen_uv_tvbv_b_tfbf, k′_uv_tvbv_b_tfbf, m′s_uv_tvbv_b_tfbf = find_plot_critical_Ra_k_A(
     bcs_type_uv_tvbv_b_tfbf, ks_uv_tvbv_b_tfbf, Ta, Pr; Ra_min=Ta*1.2, Ra_max=2e4)
                               
-save("Output/Rac_k_uv_tvbv_b_tfbf.png", fig_uv_tvbv_b_tfbf, px_per_unit=4)
+# save("Output/Rac_k_uv_tvbv_b_tfbf.png", fig_uv_tvbv_b_tfbf, px_per_unit=4)
+
+nonzero_m′s_uv_tvbv_b_tfbf, nonzero_eigvec_ind_uv_tvbv_b_tfbf = find_zero_eigenvalue(A_eigen_uv_tvbv_b_tfbf, m′s_uv_tvbv_b_tfbf)
+
 ##
 # uv: top flux, bottom value, b: top flux, bottom flux
 bcs_type_uv_tfbv_b_tfbf = (; uv = (; top=FluxBoundaryCondition, bot=ValueBoundaryCondition), 
@@ -328,7 +351,10 @@ ks_uv_tfbv_b_tfbf = 3:0.01:4.5
 res_Ra_k_uv_tfbv_b_tfbf, fig_uv_tfbv_b_tfbf, A_uv_tfbv_b_tfbf, A_eigen_uv_tfbv_b_tfbf, k′_uv_tfbv_b_tfbf, m′s_uv_tfbv_b_tfbf = find_plot_critical_Ra_k_A(
     bcs_type_uv_tfbv_b_tfbf, ks_uv_tfbv_b_tfbf, Ta, Pr; Ra_min=Ta*1.5, Ra_max=2e4)
                               
-save("Output/Rac_k_uv_tfbv_b_tfbf.png", fig_uv_tvbv_b_tfbf, px_per_unit=4)
+# save("Output/Rac_k_uv_tfbv_b_tfbf.png", fig_uv_tvbv_b_tfbf, px_per_unit=4)
+
+nonzero_m′s_uv_tfbv_b_tfbf, nonzero_eigvec_ind_uv_tfbv_b_tfbf = find_zero_eigenvalue(A_eigen_uv_tfbv_b_tfbf, m′s_uv_tfbv_b_tfbf)
+
 ##
 # uv: top flux, bottom flux, b: top value, bottom flux
 bcs_type_uv_tfbf_b_tvbf = (; uv = (; top=FluxBoundaryCondition, bot=FluxBoundaryCondition), 
@@ -339,7 +365,10 @@ ks_uv_tfbf_b_tvbf = 3.5:0.01:5
 res_Ra_k_uv_tfbf_b_tvbf, fig_uv_tfbf_b_tvbf, A_uv_tfbf_b_tvbf, A_eigen_uv_tfbf_b_tvbf, k′_uv_tfbf_b_tvbf, m′s_uv_tfbf_b_tvbf = find_plot_critical_Ra_k_A(
     bcs_type_uv_tfbf_b_tvbf, ks_uv_tfbf_b_tvbf, Ta, Pr; Ra_min=Ta*1.5, Ra_max=2e4)
 
-save("Output/Rac_k_uv_tfbf_b_tvbf.png", fig_uv_tfbf_b_tvbf, px_per_unit=4)
+# save("Output/Rac_k_uv_tfbf_b_tvbf.png", fig_uv_tfbf_b_tvbf, px_per_unit=4)
+
+nonzero_m′s_uv_tfbf_b_tvbf, nonzero_eigvec_ind_uv_tfbf_b_tvbf = find_zero_eigenvalue(A_eigen_uv_tfbf_b_tvbf, m′s_uv_tfbf_b_tvbf)
+
 ##
 # uv: top value, bottom value, b: top flux, bottom value
 bcs_type_uv_tvbv_b_tfbv = (; uv = (; top=ValueBoundaryCondition, bot=ValueBoundaryCondition), 
@@ -350,7 +379,10 @@ ks_uv_tvbv_b_tfbv = 3.5:0.01:5
 res_Ra_k_uv_tvbv_b_tfbv, fig_uv_tvbv_b_tfbv, A_uv_tvbv_b_tfbv, A_eigen_uv_tvbv_b_tfbv, k′_uv_tvbv_b_tfbv, m′s_uv_tvbv_b_tfbv = find_plot_critical_Ra_k_A(
     bcs_type_uv_tvbv_b_tfbv, ks_uv_tvbv_b_tfbv, Ta, Pr; Ra_min=Ta, Ra_max=5e4)
                               
-save("Output/Rac_k_uv_tvbv_b_tfbv.png", fig_uv_tvbv_b_tfbv, px_per_unit=4)
+# save("Output/Rac_k_uv_tvbv_b_tfbv.png", fig_uv_tvbv_b_tfbv, px_per_unit=4)
+
+nonzero_m′s_uv_tvbv_b_tfbv, nonzero_eigvec_ind_uv_tvbv_b_tfbv = find_zero_eigenvalue(A_eigen_uv_tvbv_b_tfbv, m′s_uv_tvbv_b_tfbv)
+
 ##
 # uv: top flux, bottom value, b: top flux, bottom value
 bcs_type_uv_tfbv_b_tfbv = (; uv = (; top=FluxBoundaryCondition, bot=ValueBoundaryCondition), 
@@ -361,7 +393,10 @@ ks_uv_tfbv_b_tfbv = 3:0.01:5.5
 res_Ra_k_uv_tfbv_b_tfbv, fig_uv_tfbv_b_tfbv, A_uv_tfbv_b_tfbv, A_eigen_uv_tfbv_b_tfbv, k′_uv_tfbv_b_tfbv, m′s_uv_tfbv_b_tfbv = find_plot_critical_Ra_k_A(
     bcs_type_uv_tfbv_b_tfbv, ks_uv_tfbv_b_tfbv, Ta, Pr; Ra_min=Ta, Ra_max=5e4)
                               
-save("Output/Rac_k_uv_tfbv_b_tfbv.png", fig_uv_tfbv_b_tfbv, px_per_unit=4)
+# save("Output/Rac_k_uv_tfbv_b_tfbv.png", fig_uv_tfbv_b_tfbv, px_per_unit=4)
+
+nonzero_m′s_uv_tfbv_b_tfbv, nonzero_eigvec_ind_uv_tfbv_b_tfbv = find_zero_eigenvalue(A_eigen_uv_tfbv_b_tfbv, m′s_uv_tfbv_b_tfbv)
+
 ##
 # uv: top flux, bottom value, b: top value, bottom flux
 bcs_type_uv_tfbv_b_tvbf = (; uv = (; top=FluxBoundaryCondition, bot=ValueBoundaryCondition), 
@@ -372,5 +407,8 @@ ks_uv_tfbv_b_tvbf = 1:0.01:3.5
 res_Ra_k_uv_tfbv_b_tvbf, fig_uv_tfbv_b_tvbf, A_uv_tfbv_b_tvbf, A_eigen_uv_tfbv_b_tvbf, k′_uv_tfbv_b_tvbf, m′s_uv_tfbv_b_tvbf = find_plot_critical_Ra_k_A(
     bcs_type_uv_tfbv_b_tvbf, ks_uv_tfbv_b_tvbf, Ta, Pr; Ra_min=Ta*1.2, Ra_max=1e4)
                               
-save("Output/Rac_k_uv_tfbv_b_tvbf.png", fig_uv_tfbv_b_tvbf, px_per_unit=4)
+# save("Output/Rac_k_uv_tfbv_b_tvbf.png", fig_uv_tfbv_b_tvbf, px_per_unit=4)
+
+nonzero_m′s_uv_tfbv_b_tvbf, nonzero_eigvec_ind_uv_tfbv_b_tvbf = find_zero_eigenvalue(A_eigen_uv_tfbv_b_tvbf, m′s_uv_tfbv_b_tvbf)
+
 ##
