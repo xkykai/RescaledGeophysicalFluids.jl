@@ -337,7 +337,7 @@ ks_uv_tfbv_b_tfbf = 0.01:0.01:4.5
 res_Ra_k_uv_tfbv_b_tfbf, fig_uv_tfbv_b_tfbf, A_uv_tfbv_b_tfbf, A_eigen_uv_tfbv_b_tfbf, k′_uv_tfbv_b_tfbf, m′s_uv_tfbv_b_tfbf = find_plot_critical_Ra_k_A(
     bcs_type_uv_tfbv_b_tfbf, ks_uv_tfbv_b_tfbf, Pr; Ra_min=100, Ra_max=2e3)
                               
-# save("Output/Rac_Ta0_k_uv_tfbv_b_tfbf.png", fig_uv_tvbv_b_tfbf, px_per_unit=4)
+# save("Output/Rac_Ta0_k_uv_tfbv_b_tfbf.png", fig_uv_tfbv_b_tfbf, px_per_unit=4)
 
 nonzero_m′s_uv_tfbv_b_tfbf, nonzero_eigvec_ind_uv_tfbv_b_tfbf = find_zero_eigenvalue(A_eigen_uv_tfbv_b_tfbf, m′s_uv_tfbv_b_tfbf)
 
