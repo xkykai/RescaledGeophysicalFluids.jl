@@ -58,7 +58,7 @@ simulation = Simulation(model, Δt=1e-6second, stop_time=3seconds)
 
 # simulation.stop_iteration = 30000
 
-wizard = TimeStepWizard(max_change=1.05, max_Δt=5e-6, cfl=0.6)
+wizard = TimeStepWizard(max_change=1.05, max_Δt=1.5e-6, cfl=0.6)
 # simulation.callbacks[:wizard] = Callback(wizard, IterationInterval(10))
 simulation.callbacks[:wizard] = Callback(wizard, IterationInterval(1))
 
@@ -85,13 +85,13 @@ simulation.callbacks[:print_progress] = Callback(print_progress, IterationInterv
 # simulation.callbacks[:print_progress] = Callback(print_progress, IterationInterval(1))
 
 function init_save_some_metadata!(file, model)
-    file["author"] = "Xin Kai Lee"
-    file["parameters/coriolis_parameter"] = f
-    file["parameters/density"] = 1027
-    file["parameters/rayleigh_number"] = Ra
-    file["parameters/prandtl_number"] = Pr
-    file["parameters/taylor_number"] = Ta
-    file["parameters/aspect_ratio"] = aspect_ratio
+    file["metadata/author"] = "Xin Kai Lee"
+    file["metadata/parameters/coriolis_parameter"] = f
+    file["metadata/parameters/density"] = 1027
+    file["metadata/parameters/rayleigh_number"] = Ra
+    file["metadata/parameters/prandtl_number"] = Pr
+    file["metadata/parameters/taylor_number"] = Ta
+    file["metadata/parameters/aspect_ratio"] = aspect_ratio
     return nothing
 end
 
