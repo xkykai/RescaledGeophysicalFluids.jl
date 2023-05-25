@@ -19,7 +19,8 @@ const Pr = 1
 const ν = 1
 const κ = ν / Pr
 
-const Ra = 2151.3411993087107
+# const Ra = 2151.3411993087107
+const Ra = 10000
 const S = Ra * ν * κ / Lz ^ 4
 
 const Ta = 1000
@@ -54,11 +55,11 @@ model = NonhydrostaticModel(;
 set!(model, b=b_initial)
 
 # simulation = Simulation(model, Δt=1e-6second, stop_iteration=200)
-simulation = Simulation(model, Δt=1e-6second, stop_time=3seconds)
+simulation = Simulation(model, Δt=0.2e-6second, stop_time=6seconds)
 
 # simulation.stop_iteration = 30000
 
-wizard = TimeStepWizard(max_change=1.05, max_Δt=1.5e-6, cfl=0.6)
+wizard = TimeStepWizard(max_change=1.05, max_Δt=1e-6, cfl=0.6)
 # simulation.callbacks[:wizard] = Callback(wizard, IterationInterval(10))
 simulation.callbacks[:wizard] = Callback(wizard, IterationInterval(1))
 
