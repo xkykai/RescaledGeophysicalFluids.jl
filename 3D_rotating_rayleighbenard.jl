@@ -13,7 +13,7 @@ const Lz = 1meter    # depth [m]
 const Lx = Lz / aspect_ratio # north-south extent [m]
 const Ly = Lx
 
-const Nz = 256
+const Nz = 64
 const Nx = Int(Nz / aspect_ratio)
 const Ny = Nx
 
@@ -28,6 +28,7 @@ const Ta = 1000
 const f = √(Ta * ν ^ 2 / Lz ^ 4)
 
 FILE_DIR = "Data/3D_no_wind_Ra_$(Ra)_Ta_$(Ta)_alpha_$(aspect_ratio)_Nz_$(Nz)"
+# FILE_DIR = "Data/3D_no_wind_Ra_2163.3411993087107_Ta_1000_alpha_1_Nz_64"
 mkpath(FILE_DIR)
 
 grid = RectilinearGrid(GPU(), Float64,
@@ -142,8 +143,8 @@ simulation.output_writers[:averages] = JLD2OutputWriter(model, (; B, U, V, W, UW
 
 simulation.output_writers[:checkpointer] = Checkpointer(model, schedule=TimeInterval(1seconds), prefix="$(FILE_DIR)/model_checkpoint")
 
-# run!(simulation, pickup="$(FILE_DIR)/model_checkpoint_iteration10000.jld2")
-run!(simulation)
+run!(simulation, pickup="$(FILE_DIR)/model_checkpoint_iteration400195.jld2")
+# run!(simulation)
 
 b_data = FieldTimeSeries("$(FILE_DIR)/instantaneous_fields.jld2", "b")
 B_data = FieldTimeSeries("$(FILE_DIR)/instantaneous_timeseries.jld2", "B")
@@ -187,6 +188,8 @@ for i in axes(zs_xz, 1)
 end
 
 blim = (minimum(b_data), maximum(b_data))
+
+colormap = Reverse(:RdBu_10)
 color_range = blim
 
 Blim = (minimum(B_data), maximum(B_data))
