@@ -7,7 +7,7 @@ using Printf
 using CairoMakie
 using Oceananigans.Grids: halo_size
 
-const aspect_ratio = 0.25
+const aspect_ratio = 1
 
 const Lz = 1meter    # depth [m]
 const Lx = Lz / aspect_ratio # north-south extent [m]
@@ -19,7 +19,7 @@ const Pr = 1
 const ν = 1
 const κ = ν / Pr
 
-const Ra = 1e8
+const Ra = 1717
 const S = Ra * ν * κ / Lz ^ 4
 
 const Ta = 0
@@ -54,7 +54,7 @@ model = NonhydrostaticModel(;
 set!(model, b=b_initial)
 
 # simulation = Simulation(model, Δt=1e-6second, stop_iteration=200)
-simulation = Simulation(model, Δt=0.5e-6second, stop_time=1second)
+simulation = Simulation(model, Δt=2e-6second, stop_time=6seconds)
 
 # simulation.stop_iteration = 30000
 
@@ -86,12 +86,12 @@ simulation.callbacks[:print_progress] = Callback(print_progress, IterationInterv
 
 function init_save_some_metadata!(file, model)
     file["author"] = "Xin Kai Lee"
-    file["parameters/coriolis_parameter"] = f
-    file["parameters/density"] = 1027
-    file["parameters/rayleigh_number"] = Ra
-    file["parameters/prandtl_number"] = Pr
-    file["parameters/taylor_number"] = Ta
-    file["parameters/aspect_ratio"] = aspect_ratio
+    file["metadata/parameters/coriolis_parameter"] = f
+    file["metadata/parameters/density"] = 1027
+    file["metadata/parameters/rayleigh_number"] = Ra
+    file["metadata/parameters/prandtl_number"] = Pr
+    file["metadata/parameters/taylor_number"] = Ta
+    file["metadata/parameters/aspect_ratio"] = aspect_ratio
     return nothing
 end
 
@@ -183,6 +183,6 @@ lines!(axNu, Nun, zF)
 xlims!(axB, Blim)
 xlims!(axNu, Nulim)
 
-record(fig, "$(FILE_DIR)/rayleighbenard_convection.mp4", 1:Nt, framerate=10) do nn
+record(fig, "$(FILE_DIR)/rayleighbenard_convection.mp4", 1:Nt, framerate=30) do nn
     n[] = nn
 end
