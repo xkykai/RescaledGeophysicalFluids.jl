@@ -7,7 +7,7 @@ using Printf
 using CairoMakie
 using Oceananigans.Grids: halo_size
 
-const aspect_ratio = 1
+const aspect_ratio = 0.25
 
 const Lz = 1meter    # depth [m]
 const Lx = Lz / aspect_ratio # north-south extent [m]
@@ -21,7 +21,7 @@ const Pr = 1
 const ν = 1
 const κ = ν / Pr
 
-const Ra = 2163.3411993087107
+const Ra = 2151.3411993087107
 const S = Ra * ν * κ / Lz ^ 4
 
 const Ta = 1000
@@ -60,7 +60,7 @@ set!(model, b=b_initial)
 # simulation = Simulation(model, Δt=4e-6second, stop_iteration=100000)
 simulation = Simulation(model, Δt=1e-6second, stop_time=10seconds)
 
-wizard = TimeStepWizard(max_change=1.05, max_Δt=1.5e-6, cfl=0.6)
+wizard = TimeStepWizard(max_change=1.05, max_Δt=5e-6, cfl=0.6)
 # simulation.callbacks[:wizard] = Callback(wizard, IterationInterval(10))
 simulation.callbacks[:wizard] = Callback(wizard, IterationInterval(1))
 
@@ -143,10 +143,10 @@ simulation.output_writers[:averages] = JLD2OutputWriter(model, (; B, U, V, W, UW
 
 simulation.output_writers[:checkpointer] = Checkpointer(model, schedule=TimeInterval(1seconds), prefix="$(FILE_DIR)/model_checkpoint")
 
-run!(simulation, pickup="$(FILE_DIR)/model_checkpoint_iteration400195.jld2")
-# run!(simulation)
+# run!(simulation, pickup="$(FILE_DIR)/model_checkpoint_iteration400195.jld2")
+run!(simulation)
 
-b_data = FieldTimeSeries("$(FILE_DIR)/instantaneous_fields.jld2", "b")
+b_data = FieldTimeSeries("$(FILE_DIR)/instantaneous_fields.jld2", "b", backend=OnDisk())
 B_data = FieldTimeSeries("$(FILE_DIR)/instantaneous_timeseries.jld2", "B")
 WB_data = FieldTimeSeries("$(FILE_DIR)/instantaneous_timeseries.jld2", "WB")
 
