@@ -98,13 +98,14 @@ end
 b = model.tracers.b
 u, v, w = model.velocities
 
-∂x_v = ∂x(v)
-∂z_v = ∂z(v)
+∂x_v = Field(∂x(v))
+∂z_v = Field(∂z(v))
 
-∂x_b = ∂x(b)
-∂z_b = ∂z(b)
+∂x_b = Field(∂x(b))
+∂z_b = Field(∂z(b))
 
-PV = ∂x_v * ∂z_b - ∂z_v * ∂x_b + f * ∂z_b
+PV = Field(∂x_v * ∂z_b - ∂z_v * ∂x_b + f * ∂z_b)
+compute!(PV)
 
 B = Average(b, dims=(1, 2))
 U = Average(u, dims=(1, 2))
