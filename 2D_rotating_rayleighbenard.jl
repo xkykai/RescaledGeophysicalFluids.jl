@@ -25,7 +25,13 @@ const S = Ra * ν * κ / Lz ^ 4
 const Ta = 1000
 const f = √(Ta * ν ^ 2 / Lz ^ 4)
 
-FILE_DIR = "Data/2D_no_wind_Ra_$(Ra)_Ta_$(Ta)_alpha_$(aspect_ratio)_Nz_$(Nz)"
+uv_bc_top_type = "f"
+uv_bc_bot_type = "f"
+
+b_bc_top_type = "v"
+b_bc_bot_type = "v"
+
+FILE_DIR = "Data/2D_no_wind_uv_t$(uv_bc_top_type)b$(uv_bc_bot_type)_b_t$(b_bc_top_type)b$(b_bc_bot_type)_Ra_$(Ra)_Ta_$(Ta)_alpha_$(aspect_ratio)_Nz_$(Nz)"
 mkpath(FILE_DIR)
 
 grid = RectilinearGrid(GPU(), Float64,
@@ -35,8 +41,33 @@ grid = RectilinearGrid(GPU(), Float64,
                        z = (0, Lz),
                        topology = (Periodic, Flat, Bounded))
 
-b_bcs = FieldBoundaryConditions(top = ValueBoundaryCondition(-S * Lz),
-                                bottom = ValueBoundaryCondition(0))
+if uv_bc_top_type == "f"
+  uv_bc_top = GradientBoundaryCondition(0)
+else
+  uv_bc_top = ValueBoundaryCondition(0)
+end
+
+if uv_bc_bot_type == "f"
+  uv_bc_bot = GradientBoundaryCondition(0)
+else
+  uv_bc_bot = ValueBoundaryCondition(0)
+end
+
+if b_bc_top_type == "f"
+  b_bc_top = GradientBoundaryCondition(-S)
+else
+  b_bc_top = ValueBoundaryCondition(-S * Lz)
+end
+
+if b_bc_bot_type == "f"
+  b_bc_bot = GradientBoundaryCondition(0)
+else
+  b_bc_bot = ValueBoundaryCondition(0)
+end
+
+uv_bcs = FieldBoundaryConditions(top=uv_bc_top, bottom=uv_bc_bot)
+
+b_bcs = FieldBoundaryConditions(top=b_bc_top, bottom=b_bc_bot)
 
 b_initial(x, y, z) = -rand() * Ra / 100000
 
@@ -48,7 +79,7 @@ model = NonhydrostaticModel(;
             tracers = :b,
             timestepper = :RungeKutta3,
             advection = WENO(),
-            boundary_conditions=(; b=b_bcs)
+            boundary_conditions=(; u=uv_bcs, v=uv_bcs, b=b_bcs)
             )
 
 set!(model, b=b_initial)
@@ -193,7 +224,7 @@ time_str = @lift "Ra = $(Ra), Ta = $(Ta), Pr = $(Pr), Time = $(round(b_data.time
 title = Label(fig[-1, 1:2], time_str, font=:bold)
 
 blim = (minimum(b_data), maximum(b_data))
-PVlim = (minimum(PV_data), maximum(PV_data))
+PVlim = (-maximum(abs, interior(PV_data[end], :, 1, :)), maximum(abs, interior(PV_data[end], :, 1, :)))
 
 Blim = (minimum(B_data), maximum(B_data))
 Nulim = (minimum(Nu_data), maximum(Nu_data))
@@ -206,7 +237,7 @@ lines!(axNu, Nun, zNu)
 xlims!(axB, Blim)
 xlims!(axNu, Nulim)
 
-record(fig, "$(FILE_DIR)/rayleighbenard_convection.mp4", 1:Nt, framerate=10) do nn
+record(fig, "$(FILE_DIR)/rayleighbenard_convection.mp4", 1:Nt, framerate=30) do nn
     n[] = nn
 end
 ##
