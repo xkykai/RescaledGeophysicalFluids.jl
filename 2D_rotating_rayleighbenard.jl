@@ -7,7 +7,7 @@ using Printf
 using CairoMakie
 using Oceananigans.Grids: halo_size
 
-const aspect_ratio = 0.25
+const aspect_ratio = 0.125
 
 const Lz = 1meter    # depth [m]
 const Lx = Lz / aspect_ratio # north-south extent [m]
@@ -19,7 +19,7 @@ const Pr = 1
 const ν = 1
 const κ = ν / Pr
 
-const Ra = 10000
+const Ra = 5000
 const S = Ra * ν * κ / Lz ^ 4
 
 const Ta = 1000
@@ -84,8 +84,8 @@ model = NonhydrostaticModel(;
 
 set!(model, b=b_initial)
 
-# simulation = Simulation(model, Δt=1e-6second, stop_iteration=2000)
-simulation = Simulation(model, Δt=1e-6second, stop_time=6seconds)
+# simulation = Simulation(model, Δt=2e-6second, stop_iteration=2000)
+simulation = Simulation(model, Δt=1e-6second, stop_time=3seconds)
 
 # simulation.stop_iteration = 30000
 
@@ -113,7 +113,7 @@ function print_progress(sim)
 end
 
 simulation.callbacks[:print_progress] = Callback(print_progress, IterationInterval(1000))
-# simulation.callbacks[:print_progress] = Callback(print_progress, IterationInterval(1))
+# simulation.callbacks[:print_progress] = Callback(print_progress, IterationInterval(10))
 
 function init_save_some_metadata!(file, model)
     file["metadata/author"] = "Xin Kai Lee"
@@ -129,13 +129,10 @@ end
 b = model.tracers.b
 u, v, w = model.velocities
 
-∂x_v = Field(∂x(v))
-∂z_v = Field(∂z(v))
-
-∂x_b = Field(∂x(b))
+ζ = Field(∂x(v))
 ∂z_b = Field(∂z(b))
 
-PV = Field(∂x_v * ∂z_b - ∂z_v * ∂x_b + f * ∂z_b)
+PV = Field(ζ - f * ∂z_b / S)
 compute!(PV)
 
 B = Average(b, dims=(1, 2))
@@ -184,10 +181,10 @@ simulation.output_writers[:checkpointer] = Checkpointer(model, schedule=TimeInte
 # run!(simulation, pickup="$(FILE_DIR)/model_checkpoint_iteration10000.jld2")
 run!(simulation)
 
-data = FieldDataset("$(FILE_DIR)/instantaneous_fields.jld2")
+metadata = FieldDataset("$(FILE_DIR)/instantaneous_fields.jld2").metadata
 
-b_data = data["b"]
-PV_data = data["PV"]
+b_data = FieldTimeSeries("$(FILE_DIR)/instantaneous_fields.jld2", "b")
+PV_data = FieldTimeSeries("$(FILE_DIR)/instantaneous_fields.jld2", "PV")
 
 B_data = FieldTimeSeries("$(FILE_DIR)/instantaneous_timeseries.jld2", "B")
 WB_data = FieldTimeSeries("$(FILE_DIR)/instantaneous_timeseries.jld2", "WB")
@@ -219,7 +216,7 @@ PVn = @lift interior(PV_data[$n], :, 1, :)
 
 Bn = @lift interior(B_data[$n], 1, 1, :)
 Nun = @lift Nu_data[1, 1, :, $n]
-time_str = @lift "Ra = $(Ra), Ta = $(Ta), Pr = $(Pr), Time = $(round(b_data.times[$n], digits=2))"
+time_str = @lift "Ra = $(Ra), Ta = $(Ta), Pr = $(Pr), Time = $(round(b_data.times[$n], digits=2)), Maximum |PV| = $(round(maximum(abs, interior(PV_data[$n])), digits=1))"
 
 title = Label(fig[-1, 1:2], time_str, font=:bold)
 
