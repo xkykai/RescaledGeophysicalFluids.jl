@@ -41,6 +41,14 @@ function parse_commandline()
       help = "Stop time of simulation (seconds)"
       arg_type = Float64
       default = 3.
+    "--time_interval"
+      help = "Time interval of output writer (seconds)"
+      arg_type = Float64
+      default = 1e-2
+    "--fps"
+      help = "Frames per second of animation"
+      arg_type = Float64
+      default = 20.
     "--Nz"
       help = "Number of grid points in z-direction"
       arg_type = Int64
@@ -94,6 +102,8 @@ b_bc_bot_type = args["b_bot"]
 Δt = args["dt"]
 max_Δt = args["max_dt"]
 stop_time = args["stop_time"]
+time_interval = args["time_interval"]
+fps = args["fps"]
 
 FILE_DIR = "Data/2D_no_wind_uv_t$(uv_bc_top_type)b$(uv_bc_bot_type)_b_t$(b_bc_top_type)b$(b_bc_bot_type)_Ra_$(Ra)_Ta_$(Ta)_alpha_$(aspect_ratio)_Nz_$(Nz)"
 mkpath(FILE_DIR)
@@ -219,7 +229,7 @@ field_outputs = merge(model.velocities, model.tracers, (; PV))
 
 simulation.output_writers[:jld2] = JLD2OutputWriter(model, field_outputs,
                                                           filename = "$(FILE_DIR)/instantaneous_fields.jld2",
-                                                          schedule = TimeInterval(1e-2),
+                                                          schedule = TimeInterval(time_interval),
                                                           # schedule = IterationInterval(10),
                                                           with_halos = true,
                                                         #   overwrite_existing = true,
@@ -228,7 +238,7 @@ simulation.output_writers[:jld2] = JLD2OutputWriter(model, field_outputs,
 simulation.output_writers[:timeseries] = JLD2OutputWriter(model, (; B, U, V, W, UW, VW, WW, WB, UV, VV, VB, UU, UB),
                                                           filename = "$(FILE_DIR)/instantaneous_timeseries.jld2",
                                                           # schedule = IterationInterval(10),
-                                                          schedule = TimeInterval(1e-2),
+                                                          schedule = TimeInterval(time_interval),
                                                           with_halos = true,
                                                         #   overwrite_existing = true,
                                                           init = init_save_some_metadata!)
