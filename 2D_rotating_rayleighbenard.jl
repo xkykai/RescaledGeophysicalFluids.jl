@@ -105,7 +105,8 @@ stop_time = args["stop_time"]
 time_interval = args["time_interval"]
 fps = args["fps"]
 
-FILE_DIR = "Data/2D_no_wind_uv_t$(uv_bc_top_type)b$(uv_bc_bot_type)_b_t$(b_bc_top_type)b$(b_bc_bot_type)_Ra_$(Ra)_Ta_$(Ta)_alpha_$(aspect_ratio)_Nz_$(Nz)"
+FILE_NAME = "2D_no_wind_uv_t$(uv_bc_top_type)b$(uv_bc_bot_type)_b_t$(b_bc_top_type)b$(b_bc_bot_type)_Ra_$(Ra)_Ta_$(Ta)_alpha_$(aspect_ratio)_Nz_$(Nz)"
+FILE_DIR = "Data/$(FILE_NAME)"
 mkpath(FILE_DIR)
 
 grid = RectilinearGrid(GPU(), Float64,
@@ -316,7 +317,7 @@ lines!(axNu, Nun, zNu)
 xlims!(axB, Blim)
 xlims!(axNu, Nulim)
 
-record(fig, "$(FILE_DIR)/$(FILE_DIR).mp4", 1:Nt, framerate=20) do nn
+record(fig, "$(FILE_DIR)/$(FILE_NAME).mp4", 1:Nt, framerate=20) do nn
     n[] = nn
 end
 ##
