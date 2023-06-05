@@ -142,7 +142,7 @@ end
 uv_bcs = FieldBoundaryConditions(top=uv_bc_top, bottom=uv_bc_bot)
 b_bcs = FieldBoundaryConditions(top=b_bc_top, bottom=b_bc_bot)
 
-b_initial(x, y, z) = -rand() * Ra / 100000
+b_initial(x, y, z) = -rand() * Ra / 1000000
 
 model = NonhydrostaticModel(; 
             grid = grid,
