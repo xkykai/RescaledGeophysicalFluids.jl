@@ -320,4 +320,6 @@ xlims!(axNu, Nulim)
 record(fig, "$(FILE_DIR)/$(FILE_NAME).mp4", 1:Nt, framerate=20) do nn
     n[] = nn
 end
+
+@info "Animation complete"
 ##
