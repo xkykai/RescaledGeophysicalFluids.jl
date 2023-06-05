@@ -313,7 +313,7 @@ lines!(axNu, Nun, zNu)
 xlims!(axB, Blim)
 xlims!(axNu, Nulim)
 
-record(fig, "$(FILE_DIR)/rayleighbenard_convection.mp4", 1:Nt, framerate=20) do nn
+record(fig, "$(FILE_DIR)/$(FILE_DIR).mp4", 1:Nt, framerate=20) do nn
     n[] = nn
 end
 ##
