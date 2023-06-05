@@ -116,31 +116,34 @@ grid = RectilinearGrid(GPU(), Float64,
                        topology = (Periodic, Flat, Bounded))
 
 if uv_bc_top_type == "f"
-  uv_bc_top = GradientBoundaryCondition(0)
+  uv_bc_top = Oceananigans.GradientBoundaryCondition(0)
 else
-  uv_bc_top = ValueBoundaryCondition(0)
+  uv_bc_top = Oceananigans.ValueBoundaryCondition(0)
 end
 
 if uv_bc_bot_type == "f"
-  uv_bc_bot = GradientBoundaryCondition(0)
+  uv_bc_bot = Oceananigans.GradientBoundaryCondition(0)
 else
-  uv_bc_bot = ValueBoundaryCondition(0)
+  uv_bc_bot = Oceananigans.ValueBoundaryCondition(0)
 end
 
 if b_bc_top_type == "f"
-  b_bc_top = GradientBoundaryCondition(-S)
+  b_bc_top = Oceananigans.GradientBoundaryCondition(-S)
 else
-  b_bc_top = ValueBoundaryCondition(-S * Lz)
+  b_bc_top = Oceananigans.ValueBoundaryCondition(-S * Lz)
 end
 
 if b_bc_bot_type == "f"
-  b_bc_bot = GradientBoundaryCondition(0)
+  b_bc_bot = Oceananigans.GradientBoundaryCondition(0)
 else
-  b_bc_bot = ValueBoundaryCondition(0)
+  b_bc_bot = Oceananigans.ValueBoundaryCondition(0)
 end
 
 uv_bcs = FieldBoundaryConditions(top=uv_bc_top, bottom=uv_bc_bot)
 b_bcs = FieldBoundaryConditions(top=b_bc_top, bottom=b_bc_bot)
+
+@info "Velocity BCs are: $(uv_bcs)"
+@info "Buoyancy BCs are: $(b_bcs)"
 
 b_initial(x, y, z) = -rand() * Ra / 1000000
 
