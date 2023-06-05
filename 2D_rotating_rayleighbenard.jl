@@ -146,7 +146,7 @@ b_bcs = FieldBoundaryConditions(top=b_bc_top, bottom=b_bc_bot)
 @info "Velocity BCs are: $(uv_bcs)"
 @info "Buoyancy BCs are: $(b_bcs)"
 
-b_initial(x, y, z) = -rand() * Ra / 1000000
+b_initial(x, y, z) = -rand() * Ra / 100000
 
 model = NonhydrostaticModel(; 
             grid = grid,
