@@ -1,7 +1,3 @@
-using FFTW
-using Oceananigans
-using CairoMakie
-
 function calculate_critical_k(bs, xb)
     N = length(bs)
     Δx = xb[2] - xb[1]
