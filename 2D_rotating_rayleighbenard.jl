@@ -69,6 +69,10 @@ function parse_commandline()
       help = "Type of boundary condition for buoyancy at the bottom"
       arg_type = String
       default = "v"
+    "--pickup"
+      help = "Whether to pickup from latest checkpoint"
+      arg_type = Bool
+      default = false
   end
   return parse_args(s)
 end
@@ -104,6 +108,7 @@ max_Δt = args["max_dt"]
 stop_time = args["stop_time"]
 time_interval = args["time_interval"]
 fps = args["fps"]
+pickup = args["pickup"]
 
 FILE_NAME = "2D_no_wind_uv_t$(uv_bc_top_type)b$(uv_bc_bot_type)_b_t$(b_bc_top_type)b$(b_bc_bot_type)_Ra_$(Ra)_Ta_$(Ta)_alpha_$(aspect_ratio)_Nz_$(Nz)"
 FILE_DIR = "Data/$(FILE_NAME)"
@@ -135,7 +140,7 @@ else
 end
 
 if b_bc_bot_type == "f"
-  b_bc_bot = Oceananigans.GradientBoundaryCondition(0)
+  b_bc_bot = Oceananigans.GradientBoundaryCondition(-S)
 else
   b_bc_bot = Oceananigans.ValueBoundaryCondition(0)
 end
@@ -255,8 +260,19 @@ simulation.output_writers[:averages] = JLD2OutputWriter(model, (; B, U, V, W, UW
 
 simulation.output_writers[:checkpointer] = Checkpointer(model, schedule=TimeInterval(1seconds), prefix="$(FILE_DIR)/model_checkpoint")
 
-# run!(simulation, pickup="$(FILE_DIR)/model_checkpoint_iteration10000.jld2")
-run!(simulation)
+if pickup
+  files = readdir(FILE_DIR)
+  checkpoint_files = files[occursin.("model_checkpoint_iteration", files)]
+  if !isempty(checkpoint_files)
+    checkpoint_iters = parse.(Int, [filename[findfirst("iteration", filename)[end]+1:findfirst(".jld2", filename)[1]-1] for filename in checkpoint_files])
+    pickup_iter = maximum(checkpoint_iters)
+    run!(simulation, pickup="$(FILE_DIR)/model_checkpoint_iteration$(pickup_iter).jld2")
+  else
+    run!(simulation)
+  end
+else
+  run!(simulation)
+end
 
 metadata = FieldDataset("$(FILE_DIR)/instantaneous_fields.jld2").metadata
 
@@ -288,7 +304,7 @@ fig = Figure(resolution=(1200, 1500))
 slider = Slider(fig[0, 1:2], range=1:Nt, startvalue=1)
 n = slider.value
 
-axb = Axis(fig[1, 1:2], title="b, k = $(round(kc, digits=2)), neighbouring ks = $(round.(kc_neighbourhood, digits=2))", xlabel="x", ylabel="z")
+axb = Axis(fig[1, 1:2], title="b", xlabel="x", ylabel="z")
 axPV = Axis(fig[2, 1:2], title="PV", xlabel="x", ylabel="z")
 
 axB = Axis(fig[3, 1], title="<b>", xlabel="<b>", ylabel="z")
@@ -299,12 +315,20 @@ PVn = @lift interior(PV_data[$n], :, 1, :)
 
 Bn = @lift interior(B_data[$n], 1, 1, :)
 Nun = @lift Nu_data[1, 1, :, $n]
-time_str = @lift "Ra = $(Ra), Ta = $(Ta), Pr = $(Pr), Time = $(round(b_data.times[$n], digits=2)), Maximum |PV| = $(round(maximum(abs, interior(PV_data[$n])), digits=1))"
+time_str = @lift "Ra = $(Ra), Ta = $(Ta), Pr = $(Pr), Time = $(round(b_data.times[$n], digits=2)), Maximum |PV| = $(round(maximum(abs, interior(PV_data[$n])), digits=1)) \n
+                  k = $(round(kc, digits=3)), neighbouring ks = $(round.(kc_neighbourhood, digits=3)) \n
+                  u, v: top => $(uv_bc_top), bottom => $(uv_bc_bot) \n 
+                  b: top => $(b_bc_top), bottom => $(b_bc_bot)"
 
 title = Label(fig[-1, 1:2], time_str, font=:bold)
 
 blim = (minimum(b_data), maximum(b_data))
-PVlim = (-maximum(abs, interior(PV_data[end], :, 1, :)), maximum(abs, interior(PV_data[end], :, 1, :)))
+
+if maximum(abs, interior(PV_data[end], :, 1, :)) <= √(eps(Float64))
+  PVlim = (-1, 1)
+else
+  PVlim = (-maximum(abs, interior(PV_data[end], :, 1, :)), maximum(abs, interior(PV_data[end], :, 1, :)))
+end
 
 Blim = (minimum(B_data), maximum(B_data))
 Nulim = (minimum(Nu_data), maximum(Nu_data))
