@@ -8,6 +8,7 @@ using CairoMakie
 using Oceananigans.Grids: halo_size
 using ArgParse
 using RescaledGeophysicalFluids
+using Statistics
 
 function parse_commandline()
   s = ArgParseSettings()
@@ -20,7 +21,7 @@ function parse_commandline()
     "--taylor_number"
       help = "Taylor Number"
       arg_type = Float64
-      default = 0.
+      default = 1000.
     "--prandtl_number"
       help = "Prandtl Number"
       arg_type = Float64
@@ -40,7 +41,7 @@ function parse_commandline()
     "--stop_time"
       help = "Stop time of simulation (seconds)"
       arg_type = Float64
-      default = 3.
+      default = 2.
     "--time_interval"
       help = "Time interval of output writer (seconds)"
       arg_type = Float64
@@ -217,6 +218,12 @@ u, v, w = model.velocities
 PV = Field(ζ - f * ∂z_b / S)
 compute!(PV)
 
+∂x_p = Field(∂x(model.pressures.pHY′) + ∂x(model.pressures.pNHS))
+compute!(∂x_p)
+
+∇²u = Field(∂x(∂x(u)) + ∂y(∂y(u)) + ∂z(∂z(u)))
+compute!(∇²u)
+
 B = Average(b, dims=(1, 2))
 U = Average(u, dims=(1, 2))
 V = Average(v, dims=(1, 2))
@@ -234,7 +241,7 @@ VB = Average(v * b, dims=(1, 2))
 UU = Average(u * u, dims=(1, 2))
 UB = Average(u * b, dims=(1, 2))
 
-field_outputs = merge(model.velocities, model.tracers, (; PV))
+field_outputs = merge(model.velocities, model.tracers, (; PV, ∂x_p, ∇²u))
 
 simulation.output_writers[:jld2] = JLD2OutputWriter(model, field_outputs,
                                                           filename = "$(FILE_DIR)/instantaneous_fields.jld2",
@@ -252,7 +259,7 @@ simulation.output_writers[:timeseries] = JLD2OutputWriter(model, (; B, U, V, W, 
                                                         #   overwrite_existing = true,
                                                           init = init_save_some_metadata!)
 
-simulation.output_writers[:averages] = JLD2OutputWriter(model, (; B, U, V, W, UW, VW, WW, WB, UV, VV, VB, UU, UB),
+simulation.output_writers[:averages] = JLD2OutputWriter(model, (; B, U, V, W, UW, VW, WW, WB, UV, VV, VB, UU, UB, ∇²u, ∂x_p, v),
                                                         filename = "$(FILE_DIR)/averaged_timeseries.jld2",
                                                         schedule = AveragedTimeInterval(1seconds, window=1second),
                                                         with_halos = true,
@@ -279,10 +286,33 @@ metadata = FieldDataset("$(FILE_DIR)/instantaneous_fields.jld2").metadata
 b_data = FieldTimeSeries("$(FILE_DIR)/instantaneous_fields.jld2", "b")
 PV_data = FieldTimeSeries("$(FILE_DIR)/instantaneous_fields.jld2", "PV")
 
+# ∂x_p_data = FieldTimeSeries("$(FILE_DIR)/instantaneous_fields.jld2", "∂x_p")
+# ∇²u_data = FieldTimeSeries("$(FILE_DIR)/instantaneous_fields.jld2", "∇²u")
+# v_data = FieldTimeSeries("$(FILE_DIR)/instantaneous_fields.jld2", "v")
+
+∂x_p_data = FieldTimeSeries("$(FILE_DIR)/averaged_timeseries.jld2", "∂x_p")
+∇²u_data = FieldTimeSeries("$(FILE_DIR)/averaged_timeseries.jld2", "∇²u")
+v_data = FieldTimeSeries("$(FILE_DIR)/averaged_timeseries.jld2", "v")
+
 B_data = FieldTimeSeries("$(FILE_DIR)/instantaneous_timeseries.jld2", "B")
 WB_data = FieldTimeSeries("$(FILE_DIR)/instantaneous_timeseries.jld2", "WB")
 
 Nu_data = WB_data ./ (κ * S)
+
+geos_balance = (f .* interior(v_data) .- interior(∂x_p_data)) ./ (f .* interior(v_data))
+p_balance = interior(∂x_p_data) ./ (f .* interior(v_data))
+diff_balance = ν .* interior(∇²u_data) ./ (f .* interior(v_data))
+
+geos_balance_rms = sqrt.(mean(geos_balance .^ 2, dims=(1, 3)))
+p_balance_rms = sqrt.(mean(p_balance .^ 2, dims=(1, 3)))
+diff_balance_rms = sqrt.(mean(diff_balance .^ 2, dims=(1, 3)))
+
+geos_balance_rms = replace(geos_balance_rms, NaN => 1)
+p_balance_rms = replace(p_balance_rms, NaN => 1)
+diff_balance_rms = replace(diff_balance_rms, NaN => 1)
+
+U_data = FieldTimeSeries("$(FILE_DIR)/instantaneous_timeseries.jld2", "U")
+V_data = FieldTimeSeries("$(FILE_DIR)/instantaneous_timeseries.jld2", "V")
 
 Nt = length(b_data.times)
 
@@ -299,16 +329,18 @@ kc, kc_neighbourhood = calculate_critical_k(bs_k, xb)
 @info "Critical k = $(kc) in the neighbourhood of $(kc_neighbourhood)"
 
 ##
-fig = Figure(resolution=(1200, 1500))
+fig = Figure(resolution=(1500, 1000))
 
-slider = Slider(fig[0, 1:2], range=1:Nt, startvalue=1)
+slider = Slider(fig[0, 1:4], range=1:Nt, startvalue=1)
 n = slider.value
 
 axb = Axis(fig[1, 1:2], title="b", xlabel="x", ylabel="z")
 axPV = Axis(fig[2, 1:2], title="PV", xlabel="x", ylabel="z")
 
-axB = Axis(fig[3, 1], title="<b>", xlabel="<b>", ylabel="z")
-axNu = Axis(fig[3, 2], title="Nu", xlabel="Nu", ylabel="z")
+axB = Axis(fig[1, 3], title="<b>", xlabel="<b>", ylabel="z")
+axNu = Axis(fig[1, 4], title="Nu", xlabel="Nu", ylabel="z")
+
+axg = Axis(fig[2, 3:4], title="rms(ϕ/fv)", xlabel="t", yscale=log10)
 
 bn = @lift interior(b_data[$n], :, 1, :)
 PVn = @lift interior(PV_data[$n], :, 1, :)
@@ -320,7 +352,10 @@ time_str = @lift "Ra = $(Ra), Ta = $(Ta), Pr = $(Pr), Time = $(round(b_data.time
                   u, v: top => $(uv_bc_top), bottom => $(uv_bc_bot) \n 
                   b: top => $(b_bc_top), bottom => $(b_bc_bot)"
 
-title = Label(fig[-1, 1:2], time_str, font=:bold)
+times = b_data.times                  
+t = @lift times[$n]
+
+title = Label(fig[-1, 1:4], time_str, font=:bold)
 
 blim = (minimum(b_data), maximum(b_data))
 
@@ -332,6 +367,7 @@ end
 
 Blim = (minimum(B_data), maximum(B_data))
 Nulim = (minimum(Nu_data), maximum(Nu_data))
+glim = (minimum([minimum(geos_balance_rms), minimum(diff_balance_rms)]), maximum([maximum(geos_balance_rms), maximum(diff_balance_rms)]))
 
 heatmap!(axb, xb, zb, bn, colormap=Reverse(:RdBu_10), colorrange=blim)
 heatmap!(axPV, xPV, zPV, PVn, colormap=Reverse(:RdBu_10), colorrange=PVlim)
@@ -340,6 +376,13 @@ lines!(axNu, Nun, zNu)
 
 xlims!(axB, Blim)
 xlims!(axNu, Nulim)
+
+# lines!(axg, v_data.times, p_balance_rms[:], label="ϕ = ∂x(p)")
+lines!(axg, v_data.times, geos_balance_rms[:], label="ϕ = fv - ∂x(p)")
+lines!(axg, v_data.times, diff_balance_rms[:], label="ϕ = ν∇²u")
+axislegend(axg, position=:lt)
+vlines!(axg, t)
+ylims!(axg, glim)
 
 record(fig, "$(FILE_DIR)/$(FILE_NAME).mp4", 1:Nt, framerate=20) do nn
     n[] = nn
