@@ -311,9 +311,6 @@ geos_balance_rms = replace(geos_balance_rms, NaN => 1)
 p_balance_rms = replace(p_balance_rms, NaN => 1)
 diff_balance_rms = replace(diff_balance_rms, NaN => 1)
 
-U_data = FieldTimeSeries("$(FILE_DIR)/instantaneous_timeseries.jld2", "U")
-V_data = FieldTimeSeries("$(FILE_DIR)/instantaneous_timeseries.jld2", "V")
-
 Nt = length(b_data.times)
 
 xb, yb, zb = nodes(b_data)
