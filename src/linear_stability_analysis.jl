@@ -165,7 +165,7 @@ function find_plot_critical_Ra_k_A(bcs_type, ms_eq, ks, Ta, Pr; Ra_min, Ra_max, 
     fig = Figure()
     ax = Axis(fig[1, 1], xlabel="k", ylabel="Critical Ra", title="uv: $(bcs_type.uv), \n w: $(bcs_type.w), \n b: $(bcs_type.b)")
     lines!(ax, ks, res_Ras)
-    scatter!(ax, [k′], [Ra′], color=:black, label="k = $(round(k′, digits=2)), Ra = $(round(Ra′, digits=2)), Ta = $Ta")
+    scatter!(ax, [k′], [Ra′], color=:black, label="k = $(round(k′, digits=8)), Ra = $(round(Ra′, digits=1)), Ta = $Ta")
     axislegend(ax)
     display(fig)
 
