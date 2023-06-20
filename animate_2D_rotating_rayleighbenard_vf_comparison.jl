@@ -64,9 +64,7 @@ function calculate_balance(∂x_p, ∇²u, v, f, ν)
     geos_balance = f .* interior(v) .- interior(∂x_p)
     diff_balance = ν .* interior(∇²u)
 
-    geos_balance_ratio = (f .* interior(v) .- interior(∂x_p)) ./ interior(∂x_p)
-    geos_balance_ratio_rms = sqrt.(mean(geos_balance_ratio .^ 2, dims=(1, 3)))
-
+    geos_balance_ratio_rms = sqrt.(mean((f .* interior(v) .- interior(∂x_p)).^2, dims=(1, 3))) ./ sqrt.(mean(interior(∂x_p).^2, dims=(1, 3)))
     geos_balance_ratio_rms = replace(geos_balance_ratio_rms, NaN => 1)
 
     stat_balance = geos_balance .+ diff_balance
@@ -126,7 +124,7 @@ axstat_v = Axis(fig[2, 9:10], title="fv - ∂x(p) + ν∇²u, value boundary con
 axB = Axis(fig[1, 12], title="<b>", xlabel="<b>", ylabel="z")
 axNu = Axis(fig[2, 12], title="Nu", xlabel="Nu", ylabel="z")
 
-axr = Axis(fig[3,:], title="(fv - ∂x(p)) / ∂x_p", xlabel="t", yscale=log10)
+axr = Axis(fig[3,:], title="rms[fv - ∂x(p)] / rms[∂x(p)]", xlabel="t", yscale=log10)
 
 bn_f = @lift interior(b_data_f[$n], :, 1, :)
 bn_v = @lift interior(b_data_v[$n], :, 1, :)
