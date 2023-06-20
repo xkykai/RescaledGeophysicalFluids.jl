@@ -1,5 +1,6 @@
 using RescaledGeophysicalFluids
 using LinearAlgebra
+using CairoMakie
 
 ms_eq = evaluate_m_expr()
 
@@ -21,9 +22,15 @@ ks_uv_tfbf_b_tvbv = 3:0.01:4
 res_Ra_k_uv_tfbf_b_tvbv, fig_uv_tfbf_b_tvbv, A_uv_tfbf_b_tvbv, A_eigen_uv_tfbf_b_tvbv, k′_uv_tfbf_b_tvbv, m′s_uv_tfbf_b_tvbv = find_plot_critical_Ra_k_A(
     bcs_type_uv_tfbf_b_tvbv, ms_eq, ks_uv_tfbf_b_tvbv, Ta, Pr; Ra_min=Ta*1.5, Ra_max=1e4)
 
+RHS_uv_tfbf_b_tvbv = [0, 0, 0, 0, 0, 0, 0, res_Ra_k_uv_tfbf_b_tvbv.minimum]
+
+pinv(A_uv_tfbf_b_tvbv) * RHS_uv_tfbf_b_tvbv
+
+A_uv_tfbf_b_tvbv \ RHS_uv_tfbf_b_tvbv
+
 # save("Output/Rac_k_uv_tfbf_b_tvbv.png", fig_uv_tfbf_b_tvbv, px_per_unit=4)
 
-nonzero_m′s_uv_tfbf_b_tvbv, nonzero_eigvec_ind_uv_tfbf_b_tvbv = find_zero_eigenvalue(A_eigen_uv_tfbf_b_tvbv, m′s_uv_tfbf_b_tvbv)
+# nonzero_m′s_uv_tfbf_b_tvbv, nonzero_eigvec_ind_uv_tfbf_b_tvbv = find_zero_eigenvalue(A_eigen_uv_tfbf_b_tvbv, m′s_uv_tfbf_b_tvbv)
 
 ##
 # uv: top value, bottom value, b: top value, bottom value

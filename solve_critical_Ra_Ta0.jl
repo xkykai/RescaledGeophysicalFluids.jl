@@ -1,9 +1,15 @@
 using RescaledGeophysicalFluids
+using CairoMakie
 
 ms_eq = evaluate_m_expr()
 
 Ta = 0
 
+α = 1
+Pr = 1
+ν = 1
+H = 1
+ρ₀ = 1000
 ##
 # uv: top flux, bottom flux, b: top value, bottom value
 bcs_type_uv_tfbf_b_tvbv = (; uv = (; top=FluxBoundaryCondition, bot=FluxBoundaryCondition), 

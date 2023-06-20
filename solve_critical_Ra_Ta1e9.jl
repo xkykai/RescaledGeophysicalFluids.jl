@@ -4,7 +4,7 @@ using CairoMakie
 
 ms_eq = evaluate_m_expr()
 
-Ta = 1e6
+Ta = 1e9
 
 α = 1
 Pr = 1
@@ -18,9 +18,9 @@ bcs_type_uv_tfbf_b_tvbv = (; uv = (; top=FluxBoundaryCondition, bot=FluxBoundary
                               w = (; top=ValueBoundaryCondition, bot=ValueBoundaryCondition),
                               b = (; top=ValueBoundaryCondition, bot=ValueBoundaryCondition))
                               
-ks_uv_tfbf_b_tvbv = 12:0.01:15
+ks_uv_tfbf_b_tvbv = 38:0.01:42
 res_Ra_k_uv_tfbf_b_tvbv, fig_uv_tfbf_b_tvbv, A_uv_tfbf_b_tvbv, A_eigen_uv_tfbf_b_tvbv, k′_uv_tfbf_b_tvbv, m′s_uv_tfbf_b_tvbv = find_plot_critical_Ra_k_A(
-    bcs_type_uv_tfbf_b_tvbv, ms_eq, ks_uv_tfbf_b_tvbv, Ta, Pr; Ra_min=100, Ra_max=1e5)
+    bcs_type_uv_tfbf_b_tvbv, ms_eq, ks_uv_tfbf_b_tvbv, Ta, Pr; Ra_min=1e6, Ra_max=1e7)
 
 # save("Output/Rac_Ta1e6_k_uv_tfbf_b_tvbv.png", fig_uv_tfbf_b_tvbv, px_per_unit=4)
 
@@ -32,9 +32,9 @@ bcs_type_uv_tvbv_b_tvbv = (; uv = (; top=ValueBoundaryCondition, bot=ValueBounda
                               w = (; top=ValueBoundaryCondition, bot=ValueBoundaryCondition),
                               b = (; top=ValueBoundaryCondition, bot=ValueBoundaryCondition))
 
-ks_uv_tvbv_b_tvbv = 10:0.01:13
+ks_uv_tvbv_b_tvbv = 35:0.01:40
 res_Ra_k_uv_tvbv_b_tvbv, fig_uv_tvbv_b_tvbv, A_uv_tvbv_b_tvbv, A_eigen_uv_tvbv_b_tvbv, k′_uv_tvbv_b_tvbv, m′s_uv_tvbv_b_tvbv = find_plot_critical_Ra_k_A(
-    bcs_type_uv_tvbv_b_tvbv, ms_eq, ks_uv_tvbv_b_tvbv, Ta, Pr; Ra_min=100, Ra_max=1e5)
+    bcs_type_uv_tvbv_b_tvbv, ms_eq, ks_uv_tvbv_b_tvbv, Ta, Pr; Ra_min=1e5, Ra_max=2e7)
                               
 # save("Output/Rac_Ta1e6_k_uv_tvbv_b_tvbv.png", fig_uv_tvbv_b_tvbv, px_per_unit=4)
 
@@ -46,9 +46,9 @@ bcs_type_uv_tfbv_b_tvbv = (; uv = (; top=FluxBoundaryCondition, bot=ValueBoundar
                               w = (; top=ValueBoundaryCondition, bot=ValueBoundaryCondition),
                               b = (; top=ValueBoundaryCondition, bot=ValueBoundaryCondition))
 
-ks_uv_tfbv_b_tvbv = 10:0.01:15
+ks_uv_tfbv_b_tvbv = 37:0.01:42
 res_Ra_k_uv_tfbv_b_tvbv, fig_uv_tfbv_b_tvbv, A_uv_tfbv_b_tvbv, A_eigen_uv_tfbv_b_tvbv, k′_uv_tfbv_b_tvbv, m′s_uv_tfbv_b_tvbv = find_plot_critical_Ra_k_A(
-    bcs_type_uv_tfbv_b_tvbv, ms_eq, ks_uv_tfbv_b_tvbv, Ta, Pr; Ra_min=100, Ra_max=1e5)
+    bcs_type_uv_tfbv_b_tvbv, ms_eq, ks_uv_tfbv_b_tvbv, Ta, Pr; Ra_min=1e5, Ra_max=2e7)
                               
 # save("Output/Rac_Ta1e6_k_uv_tfbv_b_tvbv.png", fig_uv_tfbv_b_tvbv, px_per_unit=4)
 
@@ -60,9 +60,9 @@ bcs_type_uv_tfbf_b_tfbf = (; uv = (; top=FluxBoundaryCondition, bot=FluxBoundary
                               w = (; top=ValueBoundaryCondition, bot=ValueBoundaryCondition),
                               b = (; top=FluxBoundaryCondition, bot=FluxBoundaryCondition))
                               
-ks_uv_tfbf_b_tfbf = 11:0.01:15
+ks_uv_tfbf_b_tfbf = 39:0.01:42
 res_Ra_k_uv_tfbf_b_tfbf, fig_uv_tfbf_b_tfbf, A_uv_tfbf_b_tfbf, A_eigen_uv_tfbf_b_tfbf, k′_uv_tfbf_b_tfbf, m′s_uv_tfbf_b_tfbf = find_plot_critical_Ra_k_A(
-    bcs_type_uv_tfbf_b_tfbf, ms_eq, ks_uv_tfbf_b_tfbf, Ta, Pr; Ra_min=100, Ra_max=1e5)
+    bcs_type_uv_tfbf_b_tfbf, ms_eq, ks_uv_tfbf_b_tfbf, Ta, Pr; Ra_min=1e5, Ra_max=2e7)
 
 # save("Output/Rac_Ta1e6_k_uv_tfbf_b_tfbf.png", fig_uv_tfbf_b_tfbf, px_per_unit=4)
 
@@ -74,9 +74,9 @@ bcs_type_uv_tvbv_b_tfbf = (; uv = (; top=ValueBoundaryCondition, bot=ValueBounda
                               w = (; top=ValueBoundaryCondition, bot=ValueBoundaryCondition),
                               b = (; top=FluxBoundaryCondition, bot=FluxBoundaryCondition))
 
-ks_uv_tvbv_b_tfbf = 8:0.01:12
+ks_uv_tvbv_b_tfbf = 36:0.01:39
 res_Ra_k_uv_tvbv_b_tfbf, fig_uv_tvbv_b_tfbf, A_uv_tvbv_b_tfbf, A_eigen_uv_tvbv_b_tfbf, k′_uv_tvbv_b_tfbf, m′s_uv_tvbv_b_tfbf = find_plot_critical_Ra_k_A(
-    bcs_type_uv_tvbv_b_tfbf, ms_eq, ks_uv_tvbv_b_tfbf, Ta, Pr; Ra_min=100, Ra_max=1e5)
+    bcs_type_uv_tvbv_b_tfbf, ms_eq, ks_uv_tvbv_b_tfbf, Ta, Pr; Ra_min=1e5, Ra_max=2e7)
                               
 # save("Output/Rac_Ta1e6_k_uv_tvbv_b_tfbf.png", fig_uv_tvbv_b_tfbf, px_per_unit=4)
 
@@ -87,9 +87,9 @@ bcs_type_uv_tfbv_b_tfbf = (; uv = (; top=FluxBoundaryCondition, bot=ValueBoundar
                               w = (; top=ValueBoundaryCondition, bot=ValueBoundaryCondition),
                               b = (; top=FluxBoundaryCondition, bot=FluxBoundaryCondition))
 
-ks_uv_tfbv_b_tfbf = 10:0.01:14
+ks_uv_tfbv_b_tfbf = 37:0.01:40
 res_Ra_k_uv_tfbv_b_tfbf, fig_uv_tfbv_b_tfbf, A_uv_tfbv_b_tfbf, A_eigen_uv_tfbv_b_tfbf, k′_uv_tfbv_b_tfbf, m′s_uv_tfbv_b_tfbf = find_plot_critical_Ra_k_A(
-    bcs_type_uv_tfbv_b_tfbf, ms_eq, ks_uv_tfbv_b_tfbf, Ta, Pr; Ra_min=100, Ra_max=1e5)
+    bcs_type_uv_tfbv_b_tfbf, ms_eq, ks_uv_tfbv_b_tfbf, Ta, Pr; Ra_min=1e5, Ra_max=1e7)
                               
 # save("Output/Rac_Ta1e6_k_uv_tfbv_b_tfbf.png", fig_uv_tfbv_b_tfbf, px_per_unit=4)
 
@@ -101,9 +101,9 @@ bcs_type_uv_tfbf_b_tvbf = (; uv = (; top=FluxBoundaryCondition, bot=FluxBoundary
                               w = (; top=ValueBoundaryCondition, bot=ValueBoundaryCondition),
                               b = (; top=ValueBoundaryCondition, bot=FluxBoundaryCondition))
                               
-ks_uv_tfbf_b_tvbf = 11:0.01:14
+ks_uv_tfbf_b_tvbf = 39:0.01:42
 res_Ra_k_uv_tfbf_b_tvbf, fig_uv_tfbf_b_tvbf, A_uv_tfbf_b_tvbf, A_eigen_uv_tfbf_b_tvbf, k′_uv_tfbf_b_tvbf, m′s_uv_tfbf_b_tvbf = find_plot_critical_Ra_k_A(
-    bcs_type_uv_tfbf_b_tvbf, ms_eq, ks_uv_tfbf_b_tvbf, Ta, Pr; Ra_min=100, Ra_max=1e5)
+    bcs_type_uv_tfbf_b_tvbf, ms_eq, ks_uv_tfbf_b_tvbf, Ta, Pr; Ra_min=1e5, Ra_max=1e7)
 
 # save("Output/Rac_Ta1e6_k_uv_tfbf_b_tvbf.png", fig_uv_tfbf_b_tvbf, px_per_unit=4)
 
@@ -115,9 +115,9 @@ bcs_type_uv_tvbv_b_tfbv = (; uv = (; top=ValueBoundaryCondition, bot=ValueBounda
                               w = (; top=ValueBoundaryCondition, bot=ValueBoundaryCondition),
                               b = (; top=FluxBoundaryCondition, bot=ValueBoundaryCondition))
 
-ks_uv_tvbv_b_tfbv = 8:0.01:12
+ks_uv_tvbv_b_tfbv = 36:0.01:39
 res_Ra_k_uv_tvbv_b_tfbv, fig_uv_tvbv_b_tfbv, A_uv_tvbv_b_tfbv, A_eigen_uv_tvbv_b_tfbv, k′_uv_tvbv_b_tfbv, m′s_uv_tvbv_b_tfbv = find_plot_critical_Ra_k_A(
-    bcs_type_uv_tvbv_b_tfbv, ms_eq, ks_uv_tvbv_b_tfbv, Ta, Pr; Ra_min=100, Ra_max=1e5)
+    bcs_type_uv_tvbv_b_tfbv, ms_eq, ks_uv_tvbv_b_tfbv, Ta, Pr; Ra_min=1e5, Ra_max=2e7)
                               
 # save("Output/Rac_Ta1e6_k_uv_tvbv_b_tfbv.png", fig_uv_tvbv_b_tfbv, px_per_unit=4)
 
@@ -129,9 +129,9 @@ bcs_type_uv_tfbv_b_tfbv = (; uv = (; top=FluxBoundaryCondition, bot=ValueBoundar
                               w = (; top=ValueBoundaryCondition, bot=ValueBoundaryCondition),
                               b = (; top=FluxBoundaryCondition, bot=ValueBoundaryCondition))
 
-ks_uv_tfbv_b_tfbv = 11:0.01:14
+ks_uv_tfbv_b_tfbv = 37:0.01:42
 res_Ra_k_uv_tfbv_b_tfbv, fig_uv_tfbv_b_tfbv, A_uv_tfbv_b_tfbv, A_eigen_uv_tfbv_b_tfbv, k′_uv_tfbv_b_tfbv, m′s_uv_tfbv_b_tfbv = find_plot_critical_Ra_k_A(
-    bcs_type_uv_tfbv_b_tfbv, ms_eq, ks_uv_tfbv_b_tfbv, Ta, Pr; Ra_min=100, Ra_max=1e5)
+    bcs_type_uv_tfbv_b_tfbv, ms_eq, ks_uv_tfbv_b_tfbv, Ta, Pr; Ra_min=1e5, Ra_max=2e7)
                               
 # save("Output/Rac_Ta1e6_k_uv_tfbv_b_tfbv.png", fig_uv_tfbv_b_tfbv, px_per_unit=4)
 
@@ -143,9 +143,9 @@ bcs_type_uv_tfbv_b_tvbf = (; uv = (; top=FluxBoundaryCondition, bot=ValueBoundar
                               w = (; top=ValueBoundaryCondition, bot=ValueBoundaryCondition),
                               b = (; top=ValueBoundaryCondition, bot=FluxBoundaryCondition))
 
-ks_uv_tfbv_b_tvbf = 10:0.01:14
+ks_uv_tfbv_b_tvbf = 37:0.01:40
 res_Ra_k_uv_tfbv_b_tvbf, fig_uv_tfbv_b_tvbf, A_uv_tfbv_b_tvbf, A_eigen_uv_tfbv_b_tvbf, k′_uv_tfbv_b_tvbf, m′s_uv_tfbv_b_tvbf = find_plot_critical_Ra_k_A(
-    bcs_type_uv_tfbv_b_tvbf, ms_eq, ks_uv_tfbv_b_tvbf, Ta, Pr; Ra_min=100, Ra_max=1e5)
+    bcs_type_uv_tfbv_b_tvbf, ms_eq, ks_uv_tfbv_b_tvbf, Ta, Pr; Ra_min=1e5, Ra_max=2e7)
                               
 # save("Output/Rac_Ta1e6_k_uv_tfbv_b_tvbf.png", fig_uv_tfbv_b_tvbf, px_per_unit=4)
 
