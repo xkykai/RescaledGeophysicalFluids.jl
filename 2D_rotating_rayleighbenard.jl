@@ -284,6 +284,8 @@ end
 metadata = FieldDataset("$(FILE_DIR)/instantaneous_fields.jld2").metadata
 
 b_data = FieldTimeSeries("$(FILE_DIR)/instantaneous_fields.jld2", "b")
+w_data = FieldTimeSeries("$(FILE_DIR)/instantaneous_fields.jld2", "w")
+
 PV_data = FieldTimeSeries("$(FILE_DIR)/instantaneous_fields.jld2", "PV")
 
 # ∂x_p_data = FieldTimeSeries("$(FILE_DIR)/instantaneous_fields.jld2", "∂x_p")
@@ -298,6 +300,9 @@ B_data = FieldTimeSeries("$(FILE_DIR)/instantaneous_timeseries.jld2", "B")
 WB_data = FieldTimeSeries("$(FILE_DIR)/instantaneous_timeseries.jld2", "WB")
 
 Nu_data = WB_data ./ (κ * S)
+
+ms_w = mean(interior(w_data) .^ 2, dims=(1, 3))
+ms_w = replace(ms_w, 0 => 1e-15)
 
 geos_balance = (f .* interior(v_data) .- interior(∂x_p_data)) ./ (f .* interior(v_data))
 p_balance = interior(∂x_p_data) ./ (f .* interior(v_data))
@@ -326,7 +331,7 @@ kc, kc_neighbourhood = calculate_critical_k(bs_k, xb)
 @info "Critical k = $(kc) in the neighbourhood of $(kc_neighbourhood)"
 
 ##
-fig = Figure(resolution=(1500, 1000))
+fig = Figure(resolution=(1500, 1200))
 
 slider = Slider(fig[0, 1:4], range=1:Nt, startvalue=1)
 n = slider.value
@@ -338,6 +343,7 @@ axB = Axis(fig[1, 3], title="<b>", xlabel="<b>", ylabel="z")
 axNu = Axis(fig[1, 4], title="Nu", xlabel="Nu", ylabel="z")
 
 axg = Axis(fig[2, 3:4], title="rms(ϕ/fv)", xlabel="t", yscale=log10)
+axw = Axis(fig[3, 1:4], title="<w²>", xlabel="t", yscale=log10)
 
 bn = @lift interior(b_data[$n], :, 1, :)
 PVn = @lift interior(PV_data[$n], :, 1, :)
@@ -380,6 +386,9 @@ lines!(axg, v_data.times, diff_balance_rms[:], label="ϕ = ν∇²u")
 axislegend(axg, position=:lt)
 vlines!(axg, t)
 ylims!(axg, glim)
+
+lines!(axw, w_data.times, ms_w[:])
+vlines!(axw, t)
 
 record(fig, "$(FILE_DIR)/$(FILE_NAME).mp4", 1:Nt, framerate=20) do nn
     n[] = nn
