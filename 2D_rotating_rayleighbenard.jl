@@ -212,10 +212,14 @@ end
 b = model.tracers.b
 u, v, w = model.velocities
 
-ζ = Field(∂x(v))
-∂z_b = Field(∂z(b))
+# ζ = Field(∂x(v))
+# ∂z_b = Field(∂z(b))
+# PV = Field(ζ - f * ∂z_b / S)
 
-PV = Field(ζ - f * ∂z_b / S)
+PV₁ = Field(∂x(v) * ∂z(b))
+PV₂ = Field(∂z(v) * ∂x(b))
+PV₃ = Field(f * ∂z(b))
+PV = Field(PV₁ - PV₂ + PV₃)
 compute!(PV)
 
 ∂x_p = Field(∂x(model.pressures.pHY′) + ∂x(model.pressures.pNHS))
@@ -337,8 +341,7 @@ slider = Slider(fig[0, 1:4], range=1:Nt, startvalue=1)
 n = slider.value
 
 axb = Axis(fig[1, 1:2], title="b", xlabel="x", ylabel="z")
-axPV = Axis(fig[2, 1:2], title="PV", xlabel="x", ylabel="z")
-
+axPV = Axis(fig[2, 1:2], title="PV, ∂x(v) * ∂z(b) - ∂z(v) * ∂x(b) + f * ∂z(b)", xlabel="x", ylabel="z")
 axB = Axis(fig[1, 3], title="<b>", xlabel="<b>", ylabel="z")
 axNu = Axis(fig[1, 4], title="Nu", xlabel="Nu", ylabel="z")
 
