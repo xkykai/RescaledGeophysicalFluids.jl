@@ -373,7 +373,6 @@ end
 
 Blim = (minimum(B_data), maximum(B_data))
 Nulim = (minimum(Nu_data), maximum(Nu_data))
-glim = (minimum([minimum(geos_balance_rms), minimum(diff_balance_rms)]), maximum([maximum(geos_balance_rms), maximum(diff_balance_rms)]))
 
 heatmap!(axb, xb, zb, bn, colormap=Reverse(:RdBu_10), colorrange=blim)
 heatmap!(axPV, xPV, zPV, PVn, colormap=Reverse(:RdBu_10), colorrange=PVlim)
@@ -388,7 +387,6 @@ lines!(axg, v_data.times[2:end], geos_balance_rms[2:end], label="ϕ = fv - ∂x(
 lines!(axg, v_data.times[2:end], diff_balance_rms[2:end], label="ϕ = ν∇²u")
 axislegend(axg, position=:lt)
 vlines!(axg, t)
-ylims!(axg, glim)
 xlims!(axg, (0, v_data.times[end]))
 
 lines!(axw, w_data.times[2:end], rms_w[2:end])
