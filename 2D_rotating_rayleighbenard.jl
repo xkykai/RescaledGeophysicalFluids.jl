@@ -305,8 +305,8 @@ WB_data = FieldTimeSeries("$(FILE_DIR)/instantaneous_timeseries.jld2", "WB")
 
 Nu_data = WB_data ./ (κ * S)
 
-ms_w = mean(interior(w_data) .^ 2, dims=(1, 3))
-ms_w = replace(ms_w, 0 => 1e-15)
+rms_w = sqrt.(mean(interior(w_data) .^ 2, dims=(1, 3)))
+# rms_w = replace(rms_w, 0 => 1e-15)
 
 geos_balance = (f .* interior(v_data) .- interior(∂x_p_data)) ./ (f .* interior(v_data))
 p_balance = interior(∂x_p_data) ./ (f .* interior(v_data))
@@ -316,9 +316,9 @@ geos_balance_rms = sqrt.(mean(geos_balance .^ 2, dims=(1, 3)))
 p_balance_rms = sqrt.(mean(p_balance .^ 2, dims=(1, 3)))
 diff_balance_rms = sqrt.(mean(diff_balance .^ 2, dims=(1, 3)))
 
-geos_balance_rms = replace(geos_balance_rms, NaN => 1)
-p_balance_rms = replace(p_balance_rms, NaN => 1)
-diff_balance_rms = replace(diff_balance_rms, NaN => 1)
+# geos_balance_rms = replace(geos_balance_rms, NaN => 1)
+# p_balance_rms = replace(p_balance_rms, NaN => 1)
+# diff_balance_rms = replace(diff_balance_rms, NaN => 1)
 
 Nt = length(b_data.times)
 
@@ -346,7 +346,7 @@ axB = Axis(fig[1, 3], title="<b>", xlabel="<b>", ylabel="z")
 axNu = Axis(fig[1, 4], title="Nu", xlabel="Nu", ylabel="z")
 
 axg = Axis(fig[2, 3:4], title="rms(ϕ/fv)", xlabel="t", yscale=log10)
-axw = Axis(fig[3, 1:4], title="<w²>", xlabel="t", yscale=log10)
+axw = Axis(fig[3, 1:4], title="rms(w²)", xlabel="t", yscale=log10)
 
 bn = @lift interior(b_data[$n], :, 1, :)
 PVn = @lift interior(PV_data[$n], :, 1, :)
@@ -384,14 +384,16 @@ xlims!(axB, Blim)
 xlims!(axNu, Nulim)
 
 # lines!(axg, v_data.times, p_balance_rms[:], label="ϕ = ∂x(p)")
-lines!(axg, v_data.times, geos_balance_rms[:], label="ϕ = fv - ∂x(p)")
-lines!(axg, v_data.times, diff_balance_rms[:], label="ϕ = ν∇²u")
+lines!(axg, v_data.times[2:end], geos_balance_rms[2:end], label="ϕ = fv - ∂x(p)")
+lines!(axg, v_data.times[2:end], diff_balance_rms[2:end], label="ϕ = ν∇²u")
 axislegend(axg, position=:lt)
 vlines!(axg, t)
 ylims!(axg, glim)
+xlims!(axg, (0, v_data.times[end]))
 
-lines!(axw, w_data.times, ms_w[:])
+lines!(axw, w_data.times[2:end], rms_w[2:end])
 vlines!(axw, t)
+xlims!(axw, (0, v_data.times[end]))
 
 record(fig, "$(FILE_DIR)/$(FILE_NAME).mp4", 1:Nt, framerate=20) do nn
     n[] = nn
