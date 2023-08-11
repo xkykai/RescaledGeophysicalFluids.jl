@@ -111,7 +111,8 @@ time_interval = args["time_interval"]
 fps = args["fps"]
 pickup = args["pickup"]
 
-FILE_NAME = "2D_no_wind_uv_t$(uv_bc_top_type)b$(uv_bc_bot_type)_b_t$(b_bc_top_type)b$(b_bc_bot_type)_Ra_$(Ra)_Ta_$(Ta)_alpha_$(aspect_ratio)_Nz_$(Nz)"
+FILE_NAME = "2D_no_wind_uv_t$(uv_bc_top_type)b$(uv_bc_bot_type)_b_t$(b_bc_top_type)b$(b_bc_bot_type)_Ra_$(Ra)_Ta_$(Ta)_alpha_$(aspect_ratio)_Nz_$(Nz)_C2O"
+# FILE_NAME = "2D_no_wind_uv_t$(uv_bc_top_type)b$(uv_bc_bot_type)_b_t$(b_bc_top_type)b$(b_bc_bot_type)_Ra_$(Ra)_Ta_$(Ta)_alpha_$(aspect_ratio)_Nz_$(Nz)"
 FILE_DIR = "Data/$(FILE_NAME)"
 mkpath(FILE_DIR)
 
@@ -161,7 +162,8 @@ model = NonhydrostaticModel(;
             buoyancy = BuoyancyTracer(),
             tracers = :b,
             timestepper = :RungeKutta3,
-            advection = WENO(),
+            # advection = WENO(),
+            advection = CenteredSecondOrder(),
             boundary_conditions=(; u=uv_bcs, v=uv_bcs, b=b_bcs)
             )
 
