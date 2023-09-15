@@ -134,8 +134,7 @@ time_interval = args["time_interval"]
 fps = args["fps"]
 pickup = args["pickup"]
 
-# FILE_NAME = "2D_no_wind_uv_t$(uv_bc_top_type)b$(uv_bc_bot_type)_b_t$(b_bc_top_type)b$(b_bc_bot_type)_Ra_$(Ra)_Ta_$(Ta)_alpha_$(aspect_ratio)_Nz_$(Nz)_C2O_2"
-FILE_NAME = "2D_no_wind_uv_t$(uv_bc_top_type)b$(uv_bc_bot_type)_b_t$(b_bc_top_type)b$(b_bc_bot_type)_Ra_$(Ra)_Ta_$(Ta)_alpha_$(aspect_ratio)_Nz_$(Nz)_uvwbnoise"
+FILE_NAME = "2D_no_wind_uv_t$(uv_bc_top_type)b$(uv_bc_bot_type)_b_t$(b_bc_top_type)b$(b_bc_bot_type)_Ra_$(Ra)_Ta_$(Ta)_alpha_$(aspect_ratio)_Nz_$(Nz)"
 FILE_DIR = "Data/$(FILE_NAME)"
 mkpath(FILE_DIR)
 
@@ -176,16 +175,7 @@ b_bcs = FieldBoundaryConditions(top=b_bc_top, bottom=b_bc_bot)
 @info "Velocity BCs are: $(uv_bcs)"
 @info "Buoyancy BCs are: $(b_bcs)"
 
-b_initial(x, y, z) = -S * z - rand() * Ra / 1000 * Nz / 32
-u_initial(x, y, z) = rand() / 10
-v_initial(x, y, z) = rand() / 10
-w_initial(x, y, z) = rand() / 10
-
-# u_initial(x, y, z) = 0
-# v_initial(x, y, z) = 0
-# w_initial(x, y, z) = 0
-
-# b_initial(x, y, z) = -S * z + 0.01 * S * sin(12.566 * x)
+b_initial(x, y, z) = -S * z - rand() * Nz / 32
 
 model = NonhydrostaticModel(; 
             grid = grid,
@@ -200,8 +190,7 @@ model = NonhydrostaticModel(;
             boundary_conditions=(; u=uv_bcs, v=uv_bcs, b=b_bcs)
             )
 
-# set!(model, b=b_initial)
-set!(model, b=b_initial, u=u_initial, v=v_initial, w=w_initial)
+set!(model, b=b_initial)
 
 # simulation = Simulation(model, Δt=2e-6second, stop_iteration=2000)
 simulation = Simulation(model, Δt=Δt, stop_time=stop_time)
@@ -382,7 +371,7 @@ axB = Axis(fig[1, 3], title="<b>", xlabel="<b>", ylabel="z")
 axNu = Axis(fig[1, 4], title="Nu", xlabel="Nu", ylabel="z")
 
 axg = Axis(fig[2, 3:4], title="rms(ϕ/fv)", xlabel="t", yscale=log10)
-axw = Axis(fig[3, 1:4], title="rms(w²)", xlabel="t", yscale=log10)
+axw = Axis(fig[3, 1:4], title="rms(w)", xlabel="t", yscale=log)
 
 bn = @lift interior(b_data[$n], :, 1, :)
 PVn = @lift interior(PV_data[$n], :, 1, :)
