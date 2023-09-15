@@ -74,19 +74,42 @@ function parse_commandline()
       help = "Whether to pickup from latest checkpoint"
       arg_type = Bool
       default = false
+    "--k"
+      help = "Most unstable wavenumber"
+      arg_type = Float64
+      default = 0.
+    "--n_modes"
+      help = "Number of mode unstable wavemodes"
+      arg_type = Int64
+      default = 0
+    "--Nx"
+      help = "Number of grid points in z-direction"
+      arg_type = Int64
+      default = 0
   end
   return parse_args(s)
 end
 
 args = parse_commandline()
 
-const aspect_ratio = args["aspect_ratio"]
+# const aspect_ratio = args["aspect_ratio"]
 
 const Lz = 1meter    # depth [m]
+if args["k"] == 0
+  const aspect_ratio = args["aspect_ratio"]
+else
+  const aspect_ratio = 1 / (args["n_modes"] * 2π / args["k"])
+end
+
 const Lx = Lz / aspect_ratio # north-south extent [m]
 
 const Nz = args["Nz"]
-const Nx = Int(round(Nz / aspect_ratio))
+
+if args["k"] == 0
+  const Nx = Int(round(Nz / aspect_ratio))
+else
+  const Nx = args["Nx"]
+end
 
 const Pr = args["prandtl_number"]
 const ν = 1
@@ -111,8 +134,8 @@ time_interval = args["time_interval"]
 fps = args["fps"]
 pickup = args["pickup"]
 
-FILE_NAME = "2D_no_wind_uv_t$(uv_bc_top_type)b$(uv_bc_bot_type)_b_t$(b_bc_top_type)b$(b_bc_bot_type)_Ra_$(Ra)_Ta_$(Ta)_alpha_$(aspect_ratio)_Nz_$(Nz)_C2O"
-# FILE_NAME = "2D_no_wind_uv_t$(uv_bc_top_type)b$(uv_bc_bot_type)_b_t$(b_bc_top_type)b$(b_bc_bot_type)_Ra_$(Ra)_Ta_$(Ta)_alpha_$(aspect_ratio)_Nz_$(Nz)"
+# FILE_NAME = "2D_no_wind_uv_t$(uv_bc_top_type)b$(uv_bc_bot_type)_b_t$(b_bc_top_type)b$(b_bc_bot_type)_Ra_$(Ra)_Ta_$(Ta)_alpha_$(aspect_ratio)_Nz_$(Nz)_C2O_2"
+FILE_NAME = "2D_no_wind_uv_t$(uv_bc_top_type)b$(uv_bc_bot_type)_b_t$(b_bc_top_type)b$(b_bc_bot_type)_Ra_$(Ra)_Ta_$(Ta)_alpha_$(aspect_ratio)_Nz_$(Nz)_uvwbnoise"
 FILE_DIR = "Data/$(FILE_NAME)"
 mkpath(FILE_DIR)
 
@@ -153,7 +176,16 @@ b_bcs = FieldBoundaryConditions(top=b_bc_top, bottom=b_bc_bot)
 @info "Velocity BCs are: $(uv_bcs)"
 @info "Buoyancy BCs are: $(b_bcs)"
 
-b_initial(x, y, z) = -S * z - rand() * Ra / 100000
+b_initial(x, y, z) = -S * z - rand() * Ra / 1000 * Nz / 32
+u_initial(x, y, z) = rand() / 10
+v_initial(x, y, z) = rand() / 10
+w_initial(x, y, z) = rand() / 10
+
+# u_initial(x, y, z) = 0
+# v_initial(x, y, z) = 0
+# w_initial(x, y, z) = 0
+
+# b_initial(x, y, z) = -S * z + 0.01 * S * sin(12.566 * x)
 
 model = NonhydrostaticModel(; 
             grid = grid,
@@ -162,12 +194,14 @@ model = NonhydrostaticModel(;
             buoyancy = BuoyancyTracer(),
             tracers = :b,
             timestepper = :RungeKutta3,
-            # advection = WENO(),
-            advection = CenteredSecondOrder(),
+            advection = WENO(),
+            # advection = CenteredSecondOrder(),
+            # advection = nothing,
             boundary_conditions=(; u=uv_bcs, v=uv_bcs, b=b_bcs)
             )
 
-set!(model, b=b_initial)
+# set!(model, b=b_initial)
+set!(model, b=b_initial, u=u_initial, v=v_initial, w=w_initial)
 
 # simulation = Simulation(model, Δt=2e-6second, stop_iteration=2000)
 simulation = Simulation(model, Δt=Δt, stop_time=stop_time)
