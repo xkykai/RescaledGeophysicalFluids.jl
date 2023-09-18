@@ -4,14 +4,17 @@ using Oceananigans.Grids: halo_size
 using JLD2
 using Statistics
 
-FILE_DIR_f = "./Data/2D_no_wind_uv_tfbf_b_tfbf_Ra_1759.3_Ta_1000.0_alpha_0.0625_Nz_64"
-FILE_DIR_v = "./Data/2D_no_wind_uv_tfbf_b_tvbv_Ra_1136.5_Ta_1000.0_alpha_0.0625_Nz_64"
+# FILE_DIR_f = "./Data/2D_no_wind_uv_tfbf_b_tfbf_Ra_1136.5_Ta_1000.0_alpha_0.0625_Nz_64"
+# FILE_DIR_v = "./Data/2D_no_wind_uv_tfbf_b_tvbv_Ra_1759.0_Ta_1000.0_alpha_0.0625_Nz_64"
 
-# FILE_DIR_f = "./Data/2D_no_wind_uv_tfbf_b_tfbf_Ra_90937.3_Ta_1.0e6_alpha_0.125_Nz_64"
-# FILE_DIR_v = "./Data/2D_no_wind_uv_tfbf_b_tvbv_Ra_92595.9_Ta_1.0e6_alpha_0.125_Nz_64"
+# FILE_DIR_f = "./Data/2D_no_wind_uv_tfbf_b_tfbf_Ra_90599.0_Ta_1.0e6_alpha_0.125_Nz_64"
+# FILE_DIR_v = "./Data/2D_no_wind_uv_tfbf_b_tvbv_Ra_92260.8_Ta_1.0e6_alpha_0.125_Nz_64"
 
 # FILE_DIR_f = "./Data/2D_no_wind_uv_tfbf_b_tfbf_Ra_1.1e7_Ta_1.0e9_alpha_1.0_Nz_128"
 # FILE_DIR_v = "./Data/2D_no_wind_uv_tfbf_b_tvbv_Ra_9.331674098620728e6_Ta_1.0e9_alpha_1.0_Nz_128"
+
+FILE_DIR_f = "./Data/2D_no_wind_uv_tfbf_b_tfbf_Ra_94385.64416955659_Ta_1.0e6_alpha_0.25188489844833484_Nz_64"
+FILE_DIR_v = "./Data/2D_no_wind_uv_tfbf_b_tvbv_Ra_96014.66102527594_Ta_1.0e6_alpha_0.25352089021330976_Nz_64"
 
 function load_dataset(FILE_DIR)
     metadata = jldopen("$(FILE_DIR)/instantaneous_timeseries.jld2", "r") do file
@@ -136,7 +139,7 @@ axB = Axis(fig[3, 1:2], title="<b>", xlabel="<b>", ylabel="z")
 axNu = Axis(fig[4, 1:2], title="Nu", xlabel="Nu", ylabel="z")
 
 axr = Axis(fig[3,6:11], title="rms[fv - ∂x(p)] / rms[∂x(p)]", xlabel="t", yscale=log10)
-axw = Axis(fig[4,6:11], title="rms[w²]", xlabel="t", yscale=log10)
+axw = Axis(fig[4,6:11], title="rms[w]", xlabel="t", yscale=log)
 
 bn_f = @lift interior(b_data_f[$n], :, 1, :)
 bn_v = @lift interior(b_data_v[$n], :, 1, :)
@@ -173,7 +176,7 @@ Blim = (minimum([minimum(B_data_f), minimum(B_data_v)]), maximum([maximum(B_data
 Nulim = (minimum([minimum(Nu_data_f), minimum(Nu_data_v)]), maximum([maximum(Nu_data_f), maximum(Nu_data_v)]))
 PVlim = (minimum([minimum(PV_data_f), minimum(PV_data_v)]), maximum([maximum(PV_data_f), maximum(PV_data_v)]))
 
-gmax = maximum([maximum(abs, geos_balance_f), maximum(abs, geos_balance_v)])
+gmax = maximum([maximum(abs, geos_balance_f[2:end]), maximum(abs, geos_balance_v[2:end])])
 dmax = maximum([maximum(abs, diff_balance_f), maximum(abs, diff_balance_v)])
 smax = maximum([maximum(abs, stat_balance_f), maximum(abs, stat_balance_v)])
 PVmax = maximum([maximum(abs, PV_data_f), maximum(abs, PV_data_v)])
@@ -238,7 +241,7 @@ axislegend(axw, position=:lt)
 vlines!(axw, t)
 xlims!(axw, tlim)
 
-record(fig, "Data/Ta1.0e3_fv_comparison_test_w_PV.mp4", 1:Nt, framerate=20) do nn
+record(fig, "Data/Ta1.0e6_Nz_128_fv_comparison_test_w_PV_10.mp4", 1:Nt, framerate=10) do nn
     n[] = nn
 end
 
